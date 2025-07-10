@@ -54,7 +54,9 @@ export default function ReceiptFormPage({ params }: PageProps) {
   const handleItemChange = (index: number, field: keyof ReceiptItem, value: string) => {
     setItems(prev => {
       const newItems = [...prev];
-      newItems[index][field] = value;
+      if (newItems[index]) {
+        newItems[index][field] = value;
+      }
       return newItems;
     });
   };
@@ -71,7 +73,7 @@ export default function ReceiptFormPage({ params }: PageProps) {
 
   // Validar el formulario
   const isFormValid = () => {
-    return (
+    return !!(
       clientData.name.trim() &&
       clientData.dni.trim() &&
       clientData.address.trim() &&
@@ -83,7 +85,7 @@ export default function ReceiptFormPage({ params }: PageProps) {
   const generateReceipt = () => {
     if (!isFormValid()) return;
     const total = items.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
-    const formattedDate = formatDate(receiptDate);
+    const formattedDate = formatDate(receiptDate || new Date());
     const receipt = `
 ╔══════════════════════════════════════════════════════════════════════════════╗
 ║                                  RECIBO                                    ║
@@ -216,7 +218,7 @@ Conserve este comprobante para sus registros contables.
               receipt={generatedReceipt}
               onBack={() => setStep('form')}
               receiptType={type}
-              clientName={clientData.name}
+              clientName={clientData.name || ''}
             />
           )}
         </div>
