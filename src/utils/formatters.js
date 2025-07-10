@@ -1,5 +1,5 @@
 // Función para convertir números a palabras en español
-export const numberToWords = (num: number): string => {
+export const numberToWords = (num) => {
   if (num === 0) return 'CERO';
   
   const ones = ['', 'UNO', 'DOS', 'TRES', 'CUATRO', 'CINCO', 'SEIS', 'SIETE', 'OCHO', 'NUEVE'];
@@ -56,7 +56,7 @@ export const numberToWords = (num: number): string => {
 };
 
 // Función para formatear moneda argentina
-export const formatCurrency = (amount: number): string => {
+export const formatCurrency = (amount) => {
   return new Intl.NumberFormat('es-AR', {
     style: 'currency',
     currency: 'ARS',
@@ -66,7 +66,7 @@ export const formatCurrency = (amount: number): string => {
 };
 
 // Función para formatear fechas en español
-export const formatDate = (date: Date | string): string => {
+export const formatDate = (date) => {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
   return dateObj.toLocaleDateString('es-AR', {
     weekday: 'long',
@@ -77,7 +77,7 @@ export const formatDate = (date: Date | string): string => {
 };
 
 // Función para formatear fecha corta
-export const formatShortDate = (date: Date | string): string => {
+export const formatShortDate = (date) => {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
   return dateObj.toLocaleDateString('es-AR', {
     day: '2-digit',
@@ -87,12 +87,12 @@ export const formatShortDate = (date: Date | string): string => {
 };
 
 // Función para capitalizar texto
-export const capitalize = (text: string): string => {
+export const capitalize = (text) => {
   return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
 };
 
 // Función para generar número de recibo
-export const generateReceiptNumber = (): string => {
+export const generateReceiptNumber = () => {
   const today = new Date();
   const year = today.getFullYear();
   const month = String(today.getMonth() + 1).padStart(2, '0');
@@ -102,7 +102,7 @@ export const generateReceiptNumber = (): string => {
 };
 
 // Función para generar nombre de item automático
-export const generateItemName = (description: string, type: string): string => {
+export const generateItemName = (description, type) => {
   const desc = description.toLowerCase().trim();
   
   // Patrones comunes para alquileres
@@ -151,16 +151,16 @@ export const generateItemName = (description: string, type: string): string => {
 };
 
 // Función para limpiar y formatear DNI
-export const formatDni = (dni: string): string => {
+export const formatDni = (dni) => {
   return dni.replace(/[^\d]/g, '');
 };
 
 // Función para validar y formatear email
-export const formatEmail = (email: string): string => {
+export const formatEmail = (email) => {
   return email.toLowerCase().trim();
 };
 
 // Función para formatear teléfono
-export const formatPhone = (phone: string): string => {
+export const formatPhone = (phone) => {
   return phone.replace(/[^\d\s\-\+\(\)]/g, '');
 }; 

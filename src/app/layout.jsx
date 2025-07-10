@@ -1,11 +1,10 @@
 import React from 'react';
-import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
 
-export const metadata: Metadata = {
+export const metadata = {
   title: 'KONRAD Inmobiliaria - Generadores',
   description: 'Sistema de generación de contratos y recibos para KONRAD Inversiones + Desarrollos Inmobiliarios',
   keywords: 'inmobiliaria, contratos, recibos, Santa Rosa, La Pampa',
@@ -14,17 +13,13 @@ export const metadata: Metadata = {
   manifest: '/manifest.json',
 };
 
-export const viewport: Viewport = {
+export const viewport = {
   width: 'device-width',
   initialScale: 1,
   themeColor: '#0ea5e9',
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }) {
   return (
     <html lang="es" className="h-full">
       <head>

@@ -1,7 +1,5 @@
-import { AppConfig } from '@/types';
-
 // Configuración de la empresa
-export const COMPANY_CONFIG: AppConfig = {
+export const COMPANY_CONFIG = {
   companyName: 'KONRAD Inversiones + Desarrollos Inmobiliarios',
   companyAddress: 'calle AMEGHINO Nº 602, Santa Rosa, La Pampa',
   companyPhone: '+54 2954 123456',
@@ -23,7 +21,7 @@ export const CONTRACT_TYPES = {
     description: 'Alquiler para uso comercial',
     icon: 'Store',
   },
-} as const;
+};
 
 // Configuración de tipos de recibos
 export const RECEIPT_TYPES = {
@@ -52,7 +50,7 @@ export const RECEIPT_TYPES = {
     description: 'Otros conceptos',
     icon: 'FileText',
   },
-} as const;
+};
 
 // Configuración de ajustes de contrato
 export const ADJUSTMENT_TYPES = {
@@ -72,7 +70,7 @@ export const ADJUSTMENT_TYPES = {
     name: 'DNU ICL',
     description: 'Decreto de Necesidad y Urgencia ICL',
   },
-} as const;
+};
 
 // Configuración de duración de contratos
 export const CONTRACT_DURATIONS = [
@@ -81,7 +79,7 @@ export const CONTRACT_DURATIONS = [
   { value: '36', label: '36 meses' },
   { value: '48', label: '48 meses' },
   { value: '60', label: '60 meses' },
-] as const;
+];
 
 // Configuración de validaciones
 export const VALIDATION_CONFIG = {
@@ -89,7 +87,7 @@ export const VALIDATION_CONFIG = {
   allowedFileTypes: ['.docx', '.doc', '.pdf'],
   maxItemsPerReceipt: 10,
   maxDescriptionLength: 500,
-} as const;
+};
 
 // Configuración de seguridad
 export const SECURITY_CONFIG = {
@@ -97,7 +95,7 @@ export const SECURITY_CONFIG = {
   sessionTimeout: 30 * 60 * 1000, // 30 minutos
   passwordMinLength: 8,
   requireSpecialChars: true,
-} as const;
+};
 
 // Configuración de la aplicación
 export const APP_CONFIG = {
@@ -108,4 +106,4 @@ export const APP_CONFIG = {
   maxUploadSize: 10 * 1024 * 1024, // 10MB
   supportedLanguages: ['es'],
   defaultLanguage: 'es',
-} as const; 
+}; 

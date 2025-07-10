@@ -1,29 +1,27 @@
-import { FieldValidation } from '@/types';
-
 // Validadores básicos
 export const validators = {
-  required: (value: string, fieldName: string): string => {
+  required: (value, fieldName) => {
     if (!value || !value.toString().trim()) {
       return `${fieldName} es obligatorio`;
     }
     return '';
   },
   
-  email: (value: string): string => {
+  email: (value) => {
     if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
       return 'Formato de email inválido';
     }
     return '';
   },
   
-  dni: (value: string): string => {
+  dni: (value) => {
     if (value && !/^\d{7,8}$/.test(value.replace(/\./g, ''))) {
       return 'DNI debe tener 7 u 8 dígitos';
     }
     return '';
   },
   
-  name: (value: string, fieldName: string): string => {
+  name: (value, fieldName) => {
     const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
     if (value && !nameRegex.test(value)) {
       return `${fieldName} solo puede contener letras y espacios`;
@@ -34,28 +32,28 @@ export const validators = {
     return '';
   },
   
-  amount: (value: string): string => {
+  amount: (value) => {
     if (value && (isNaN(parseFloat(value)) || parseFloat(value) <= 0)) {
       return 'Debe ser un monto válido mayor a 0';
     }
     return '';
   },
   
-  date: (value: string): string => {
+  date: (value) => {
     if (value && new Date(value) < new Date()) {
       return 'La fecha no puede ser anterior a hoy';
     }
     return '';
   },
   
-  phone: (value: string): string => {
+  phone: (value) => {
     if (value && !/^[\d\s\-\+\(\)]+$/.test(value)) {
       return 'Formato de teléfono inválido';
     }
     return '';
   },
   
-  cuit: (value: string): string => {
+  cuit: (value) => {
     if (value && !/^\d{2}-\d{8}-\d{1}$/.test(value)) {
       return 'CUIT debe tener formato XX-XXXXXXXX-X';
     }
@@ -64,7 +62,7 @@ export const validators = {
 };
 
 // Función para validar un campo específico
-export const validateField = (fieldName: string, value: string, contractType?: string): string => {
+export const validateField = (fieldName, value, contractType) => {
   let error = '';
   
   // Validaciones específicas por campo
@@ -129,8 +127,8 @@ export const validateField = (fieldName: string, value: string, contractType?: s
 };
 
 // Función para validar todo el formulario
-export const validateForm = (formData: Record<string, string>, contractType?: string): FieldValidation => {
-  const errors: FieldValidation = {};
+export const validateForm = (formData, contractType) => {
+  const errors = {};
   
   Object.keys(formData).forEach(fieldName => {
     const error = validateField(fieldName, formData[fieldName], contractType);
@@ -143,17 +141,12 @@ export const validateForm = (formData: Record<string, string>, contractType?: st
 };
 
 // Función para verificar si el formulario es válido
-export const isFormValid = (errors: FieldValidation): boolean => {
+export const isFormValid = (errors) => {
   return Object.keys(errors).length === 0;
 };
 
 // Función para obtener el estado visual del campo
-export const getFieldStatus = (
-  fieldName: string, 
-  errors: FieldValidation, 
-  touchedFields: Record<string, boolean>, 
-  formData: Record<string, string>
-): 'error' | 'success' | 'default' => {
+export const getFieldStatus = (fieldName, errors, touchedFields, formData) => {
   const hasError = errors[fieldName];
   const isTouched = touchedFields[fieldName];
   const hasValue = formData[fieldName];
@@ -168,7 +161,7 @@ export const getFieldStatus = (
 };
 
 // Función para obtener clases CSS según el estado del campo
-export const getFieldClasses = (status: 'error' | 'success' | 'default'): string => {
+export const getFieldClasses = (status) => {
   const baseClasses = "w-full px-4 py-3 bg-slate-700/50 border rounded-xl focus:outline-none transition-all text-white placeholder-slate-400";
   
   switch (status) {

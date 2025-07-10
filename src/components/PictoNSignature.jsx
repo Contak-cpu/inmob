@@ -1,11 +1,7 @@
 import React from 'react';
 import { Code, Heart } from 'lucide-react';
 
-interface PictoNSignatureProps {
-  className?: string;
-}
-
-export default function PictoNSignature({ className = '' }: PictoNSignatureProps) {
+export default function PictoNSignature({ className = '' }) {
   return (
     <div className={`flex items-center justify-center space-x-1 text-xs text-neutral-500 ${className}`}>
       <span className="font-mono">pictoN</span>
