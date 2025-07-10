@@ -219,6 +219,10 @@ export const validateContractData = (data, contractType) => {
     errors.deposit = 'El depósito es obligatorio';
   }
   
+  if (!data.adjustmentType) {
+    errors.adjustmentType = 'El tipo de ajuste es obligatorio';
+  }
+  
   return errors;
 };
 

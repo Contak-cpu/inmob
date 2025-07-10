@@ -332,6 +332,141 @@ export default function ContractForm({
               <p className="text-error-400 text-sm mt-1">{errors.deposit}</p>
             )}
           </div>
+
+          <div>
+            <label className="block text-sm font-medium text-neutral-300 mb-2">
+              Tipo de Ajuste *
+            </label>
+            <select
+              value={localFormData.adjustmentType || ''}
+              onChange={(e) => handleInputChange('adjustmentType', e.target.value)}
+              className={`input-field ${errors.adjustmentType ? 'border-error-500' : ''}`}
+            >
+              <option value="">Seleccionar tipo de ajuste</option>
+              <option value="CVS_CER">CVS CER</option>
+              <option value="CVS_ICL">CVS ICL</option>
+              <option value="DNU_IPC">DNU IPC</option>
+              <option value="DNU_ICL">DNU ICL</option>
+              <option value="ninguno">Sin ajuste</option>
+            </select>
+            {errors.adjustmentType && (
+              <p className="text-error-400 text-sm mt-1">{errors.adjustmentType}</p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Guarantors Information */}
+      <div className="space-y-6">
+        <div className="flex items-center space-x-3 mb-6">
+          <User className="h-6 w-6 text-primary-400" />
+          <h3 className="text-xl font-semibold text-white">Información de Garantes</h3>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-neutral-300 mb-2">
+              Nombre del Garante 1
+            </label>
+            <input
+              type="text"
+              value={localFormData.guarantor1Name || ''}
+              onChange={(e) => handleInputChange('guarantor1Name', e.target.value)}
+              className="input-field"
+              placeholder="Ej: Carlos López"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-neutral-300 mb-2">
+              DNI del Garante 1
+            </label>
+            <input
+              type="text"
+              value={localFormData.guarantor1Document || ''}
+              onChange={(e) => handleInputChange('guarantor1Document', e.target.value)}
+              className="input-field"
+              placeholder="Ej: 12345678"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-neutral-300 mb-2">
+              Teléfono del Garante 1
+            </label>
+            <input
+              type="tel"
+              value={localFormData.guarantor1Phone || ''}
+              onChange={(e) => handleInputChange('guarantor1Phone', e.target.value)}
+              className="input-field"
+              placeholder="Ej: +54 11 1234-5678"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-neutral-300 mb-2">
+              Email del Garante 1
+            </label>
+            <input
+              type="email"
+              value={localFormData.guarantor1Email || ''}
+              onChange={(e) => handleInputChange('guarantor1Email', e.target.value)}
+              className="input-field"
+              placeholder="Ej: carlos@email.com"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-neutral-300 mb-2">
+              Nombre del Garante 2
+            </label>
+            <input
+              type="text"
+              value={localFormData.guarantor2Name || ''}
+              onChange={(e) => handleInputChange('guarantor2Name', e.target.value)}
+              className="input-field"
+              placeholder="Ej: Ana Martínez"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-neutral-300 mb-2">
+              DNI del Garante 2
+            </label>
+            <input
+              type="text"
+              value={localFormData.guarantor2Document || ''}
+              onChange={(e) => handleInputChange('guarantor2Document', e.target.value)}
+              className="input-field"
+              placeholder="Ej: 87654321"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-neutral-300 mb-2">
+              Teléfono del Garante 2
+            </label>
+            <input
+              type="tel"
+              value={localFormData.guarantor2Phone || ''}
+              onChange={(e) => handleInputChange('guarantor2Phone', e.target.value)}
+              className="input-field"
+              placeholder="Ej: +54 11 8765-4321"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-neutral-300 mb-2">
+              Email del Garante 2
+            </label>
+            <input
+              type="email"
+              value={localFormData.guarantor2Email || ''}
+              onChange={(e) => handleInputChange('guarantor2Email', e.target.value)}
+              className="input-field"
+              placeholder="Ej: ana@email.com"
+            />
+          </div>
         </div>
       </div>
 
