@@ -220,21 +220,17 @@ export const validateContractData = (data, contractType) => {
   }
   
   // Validaciones específicas según el tipo de contrato
-  if (contractType === 'comercial_ipc') {
+  if (contractType === 'comercial') {
     if (!data.adjustmentType || data.adjustmentType !== 'IPC') {
       errors.adjustmentType = 'El contrato comercial debe usar ajuste IPC';
     }
-  } else if (contractType === 'casa_dnu_icl') {
-    if (!data.adjustmentType || data.adjustmentType !== 'DNU_ICL') {
-      errors.adjustmentType = 'El contrato casa debe usar ajuste DNU ICL';
+  } else if (contractType === 'casa') {
+    if (!data.adjustmentType || data.adjustmentType !== 'ICL') {
+      errors.adjustmentType = 'El contrato casa debe usar ajuste ICL';
     }
-  } else if (contractType === 'casa_dnu_ipc') {
-    if (!data.adjustmentType || data.adjustmentType !== 'DNU_IPC') {
-      errors.adjustmentType = 'El contrato casa debe usar ajuste DNU IPC';
-    }
-  } else if (contractType === 'casa_empresas') {
+  } else if (contractType === 'empresas') {
     if (!data.adjustmentType || data.adjustmentType !== 'EMPRESAS') {
-      errors.adjustmentType = 'El contrato para empresas debe usar ajuste específico';
+      errors.adjustmentType = 'El contrato empresarial debe usar ajuste específico';
     }
   }
   

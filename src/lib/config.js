@@ -11,33 +11,29 @@ export const COMPANY_CONFIG = {
 
 // Configuración de tipos de contratos
 export const CONTRACT_TYPES = {
-  comercial_ipc: {
-    name: 'Contrato Comercial - IPC',
+  comercial: {
+    name: 'Contrato Comercial',
     description: 'Alquiler comercial con ajuste IPC',
     icon: 'Store',
     adjustmentType: 'IPC',
     category: 'comercial',
+    color: 'primary',
   },
-  casa_dnu_icl: {
-    name: 'Contrato Casa - DNU ICL',
-    description: 'Vivienda familiar con ajuste DNU ICL',
+  casa: {
+    name: 'Contrato Casa',
+    description: 'Vivienda familiar con ajuste ICL',
     icon: 'Home',
-    adjustmentType: 'DNU_ICL',
+    adjustmentType: 'ICL',
     category: 'vivienda',
+    color: 'secondary',
   },
-  casa_dnu_ipc: {
-    name: 'Contrato Casa - DNU IPC',
-    description: 'Vivienda familiar con ajuste DNU IPC',
-    icon: 'Home',
-    adjustmentType: 'DNU_IPC',
-    category: 'vivienda',
-  },
-  casa_empresas: {
-    name: 'Contrato Casa para Empresas',
+  empresas: {
+    name: 'Contrato Empresarial',
     description: 'Vivienda alquilada por empresas',
     icon: 'Building',
     adjustmentType: 'EMPRESAS',
     category: 'empresarial',
+    color: 'success',
   },
 };
 
@@ -76,13 +72,9 @@ export const ADJUSTMENT_TYPES = {
     name: 'IPC',
     description: 'Índice de Precios al Consumidor',
   },
-  DNU_IPC: {
-    name: 'DNU IPC',
-    description: 'Decreto de Necesidad y Urgencia - IPC',
-  },
-  DNU_ICL: {
-    name: 'DNU ICL',
-    description: 'Decreto de Necesidad y Urgencia - ICL',
+  ICL: {
+    name: 'ICL',
+    description: 'Índice de Contratos de Locación',
   },
   EMPRESAS: {
     name: 'Empresas',

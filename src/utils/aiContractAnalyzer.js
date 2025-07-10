@@ -2,22 +2,17 @@
 export class AIContractAnalyzer {
   constructor() {
     this.templates = {
-      comercial_ipc: {
+      comercial: {
         keywords: ['comercial', 'IPC', 'locación comercial', 'uso comercial'],
         requiredClauses: ['OBJETO', 'PLAZO', 'PRECIO', 'DEPÓSITO', 'GARANTES', 'GASTOS'],
         legalTerms: ['LOCADOR', 'LOCATARIO', 'locación', 'comercial']
       },
-      casa_dnu_icl: {
-        keywords: ['vivienda familiar', 'DNU ICL', 'familiar', 'hogar'],
+      casa: {
+        keywords: ['vivienda familiar', 'ICL', 'familiar', 'hogar'],
         requiredClauses: ['OBJETO', 'PLAZO', 'PRECIO', 'DEPÓSITO', 'GARANTES', 'GASTOS'],
         legalTerms: ['LOCADOR', 'LOCATARIO', 'vivienda', 'familiar']
       },
-      casa_dnu_ipc: {
-        keywords: ['vivienda familiar', 'DNU IPC', 'familiar', 'hogar'],
-        requiredClauses: ['OBJETO', 'PLAZO', 'PRECIO', 'DEPÓSITO', 'GARANTES', 'GASTOS'],
-        legalTerms: ['LOCADOR', 'LOCATARIO', 'vivienda', 'familiar']
-      },
-      casa_empresas: {
+      empresas: {
         keywords: ['empresas', 'empresarial', 'uso empresarial'],
         requiredClauses: ['OBJETO', 'PLAZO', 'PRECIO', 'DEPÓSITO', 'GARANTES', 'GASTOS'],
         legalTerms: ['LOCADOR', 'LOCATARIO', 'empresarial']

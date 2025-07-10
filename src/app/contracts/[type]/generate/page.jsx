@@ -185,8 +185,7 @@ export default function ContractGeneratePage() {
               </div>
             </div>
             <div className="text-right">
-              <p className="text-sm text-neutral-400">KONRAD Inmobiliaria</p>
-              <p className="text-xs text-neutral-500">Mat. 573</p>
+              <p className="text-sm text-neutral-400">Konrad Inversiones + Desarrollos Inmobiliarios</p>
             </div>
           </div>
         </div>

@@ -99,8 +99,7 @@ export default function ContractTypePage() {
               </div>
             </div>
             <div className="text-right">
-              <p className="text-sm text-neutral-400">KONRAD Inmobiliaria</p>
-              <p className="text-xs text-neutral-500">Mat. 573</p>
+              <p className="text-sm text-neutral-400">Konrad Inversiones + Desarrollos Inmobiliarios</p>
             </div>
           </div>
         </div>
@@ -182,7 +181,7 @@ export default function ContractTypePage() {
         <div className="container mx-auto px-6 py-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
             <p className="text-xs sm:text-sm text-neutral-400">
-              © 2024 KONRAD Inmobiliaria. Todos los derechos reservados.
+              © 2013 Konrad Inversiones + Desarrollos Inmobiliarios. Todos los derechos reservados.
             </p>
             <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4">
               <p className="text-[10px] sm:text-xs text-neutral-500">
