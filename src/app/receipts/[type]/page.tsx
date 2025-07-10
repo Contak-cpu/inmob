@@ -210,7 +210,7 @@ Conserve este comprobante para sus registros contables.
               onGenerate={generateReceipt}
               isFormValid={isFormValid()}
               receiptType={type}
-              receiptDate={receiptDate || new Date().toISOString().split('T')[0]}
+              receiptDate={receiptDate}
               onDateChange={setReceiptDate}
             />
           ) : (

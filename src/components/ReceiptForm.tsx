@@ -18,7 +18,7 @@ interface ReceiptFormProps {
   onGenerate: () => void;
   isFormValid: boolean;
   receiptType: ReceiptType;
-  receiptDate: string;
+  receiptDate?: string;
   onDateChange: (date: string) => void;
 }
 
@@ -197,7 +197,7 @@ export default function ReceiptForm({
         </h3>
         <input
           type="date"
-          value={receiptDate}
+          value={receiptDate || ''}
           onChange={e => onDateChange(e.target.value)}
           className="input-field w-60"
         />
