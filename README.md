@@ -68,6 +68,15 @@ NODE_ENV=production
 NEXT_PUBLIC_APP_URL=https://tu-dominio.vercel.app
 ```
 
+### Solución de Problemas de Deploy
+
+Si encuentras problemas con el deploy en Vercel:
+
+1. **Verificar configuración de Tailwind**: Las paletas de colores están completas
+2. **Verificar archivos de configuración**: `next.config.js`, `vercel.json`, `tailwind.config.js`
+3. **Verificar dependencias**: Todas las dependencias están en `package.json`
+4. **Verificar tipos TypeScript**: Archivos de tipos están completos
+
 ## 📁 Estructura del Proyecto
 
 ```

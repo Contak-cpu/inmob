@@ -38,34 +38,14 @@ const nextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
-  // Optimizaciones de performance
-  experimental: {
-    optimizeCss: true,
-    optimizePackageImports: ['lucide-react'],
-  },
-  // Configuración de webpack
-  webpack: (config, { dev, isServer }) => {
-    // Optimizaciones para producción
-    if (!dev && !isServer) {
-      config.optimization.splitChunks = {
-        chunks: 'all',
-        cacheGroups: {
-          vendor: {
-            test: /[\\/]node_modules[\\/]/,
-            name: 'vendors',
-            chunks: 'all',
-          },
-        },
-      };
-    }
-    return config;
-  },
   // Configuración de trailing slash
   trailingSlash: false,
   // Configuración de base path (si es necesario)
   basePath: '',
   // Configuración de asset prefix
   assetPrefix: process.env.NODE_ENV === 'production' ? '' : '',
+  // Configuración para Vercel
+  output: 'standalone',
 };
 
 module.exports = nextConfig; 

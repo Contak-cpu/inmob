@@ -1,0 +1,16 @@
+{
+  "name": "KONRAD Inmobiliaria - Generadores",
+  "short_name": "KONRAD",
+  "description": "Sistema de generación de contratos y recibos para KONRAD Inversiones + Desarrollos Inmobiliarios",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#1e3a8a",
+  "icons": [
+    {
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+} 

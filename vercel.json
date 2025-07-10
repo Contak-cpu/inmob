@@ -1,12 +1,10 @@
 {
   "version": 2,
   "name": "konrad-inmobiliaria",
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/next"
-    }
-  ],
+  "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
   "headers": [
     {
       "source": "/(.*)",
@@ -38,8 +36,5 @@
         }
       ]
     }
-  ],
-  "env": {
-    "NODE_ENV": "production"
-  }
+  ]
 } 

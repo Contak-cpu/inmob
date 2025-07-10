@@ -36,11 +36,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
       <body className={`${inter.className} h-full`}>
-        <header className="w-full flex items-center gap-4 px-6 py-3 bg-slate-900/80 border-b border-slate-700/50">
-          <img src="/logo.svg" alt="Logo KONRAD" className="h-10 w-10 rounded shadow" />
-          <span className="text-2xl font-bold text-white tracking-tight">KONRAD Inmobiliaria</span>
-        </header>
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+        <div className="min-h-screen bg-gradient-to-br from-neutral-900 via-neutral-800 to-neutral-900">
           {children}
         </div>
       </body>
