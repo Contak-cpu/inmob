@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Receipt, Download, Printer, Share2, FileText } from 'lucide-react';
+import { Receipt, Download, Printer, Share2 } from 'lucide-react';
 
 const ReceiptForm = ({ receiptType }) => {
   const [receiptData, setReceiptData] = useState({});
@@ -203,17 +203,17 @@ const ReceiptForm = ({ receiptType }) => {
 
   const handleDownload = () => {
     // Simular descarga
-    console.log('Descargando recibo...');
+    // Download functionality
   };
 
   const handlePrint = () => {
     // Simular impresión
-    console.log('Imprimiendo recibo...');
+    // Print functionality
   };
 
   const handleShare = () => {
     // Simular compartir
-    console.log('Compartiendo recibo...');
+    // Share functionality
   };
 
   const renderField = (field) => {

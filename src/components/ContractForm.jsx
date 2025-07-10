@@ -1,9 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Calendar, MapPin, User, Building, DollarSign, FileText, AlertCircle } from 'lucide-react';
+import { User, Building, DollarSign, FileText, AlertCircle } from 'lucide-react';
 import { CONTRACT_TYPES, ADJUSTMENT_TYPES } from '@/lib/config';
-import { formatCurrency, formatDate } from '@/utils/formatters';
 
 export default function ContractForm({
   contractType,

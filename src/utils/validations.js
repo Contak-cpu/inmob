@@ -242,7 +242,7 @@ export const validateContractData = (data, contractType) => {
 };
 
 // Función para validar datos de recibo
-export const validateReceiptData = (data, receiptType) => {
+export const validateReceiptData = (data) => {
   const errors = {};
   
   // Validaciones básicas

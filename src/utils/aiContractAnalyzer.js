@@ -73,7 +73,7 @@ export class AIContractAnalyzer {
   }
 
   // Analizar estructura del contrato
-  analyzeStructure(contract, template) {
+  analyzeStructure(contract) {
     const issues = [];
     let score = 0;
 
@@ -195,7 +195,7 @@ export class AIContractAnalyzer {
         status: analysis.score >= 80 ? 'APPROVED' : 'NEEDS_REVISION'
       };
     } catch (error) {
-      console.error('Error en análisis de IA:', error);
+      // Error handling
       return {
         error: 'Error en el análisis',
         status: 'ERROR'

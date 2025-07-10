@@ -1,4 +1,4 @@
-import { CONTRACT_TYPES, ADJUSTMENT_TYPES, COMPANY_CONFIG } from '@/lib/config';
+import { CONTRACT_TYPES, COMPANY_CONFIG } from '@/lib/config';
 import { formatCurrency, formatDate } from '@/utils/formatters';
 
 // Función para generar el contrato según el tipo

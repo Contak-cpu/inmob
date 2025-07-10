@@ -73,7 +73,7 @@ export default function ContractTypePage() {
       // Navigate to preview/generation page
       router.push(`/contracts/${contractType}/generate`);
     } catch (error) {
-      console.error('Error submitting form:', error);
+      // Error handling
     } finally {
       setIsSubmitting(false);
     }

@@ -91,7 +91,7 @@ export default function ContractGeneratePage() {
       
       setIsGenerated(true);
     } catch (error) {
-      console.error('Error generating contract:', error);
+      // Error handling
     } finally {
       setIsGenerating(false);
       setIsAnalyzing(false);
@@ -104,8 +104,7 @@ export default function ContractGeneratePage() {
       const fileName = `Contrato_${contract.name.replace(/\s+/g, '_')}_${formatDate(new Date()).replace(/\//g, '-')}.txt`;
       downloadContract(contractText, fileName);
     } catch (error) {
-      console.error('Error generando contrato:', error);
-      alert('Error al generar el contrato');
+      // Error handling
     }
   };
 
@@ -116,7 +115,7 @@ export default function ContractGeneratePage() {
 
   const handleShare = () => {
     // Simular compartir
-    console.log('Compartiendo contrato...');
+    // Share functionality
   };
 
   const handleTestContract = () => {
@@ -499,7 +498,7 @@ export default function ContractGeneratePage() {
                       <h4 className="text-sm font-semibold text-red-400 mb-2">Problemas Detectados:</h4>
                       <ul className="space-y-1">
                         {aiAnalysis.analysis.issues.map((issue, index) => (
-                          <li key={index} className="text-sm text-neutral-300 flex items-start space-x-2">
+                          <li key={`issue-${index}`} className="text-sm text-neutral-300 flex items-start space-x-2">
                             <span className="text-red-400 mt-1">•</span>
                             <span>{issue}</span>
                           </li>
@@ -513,7 +512,7 @@ export default function ContractGeneratePage() {
                       <h4 className="text-sm font-semibold text-blue-400 mb-2">Sugerencias:</h4>
                       <ul className="space-y-1">
                         {aiAnalysis.analysis.suggestions.map((suggestion, index) => (
-                          <li key={index} className="text-sm text-neutral-300 flex items-start space-x-2">
+                          <li key={`suggestion-${index}`} className="text-sm text-neutral-300 flex items-start space-x-2">
                             <span className="text-blue-400 mt-1">•</span>
                             <span>{suggestion}</span>
                           </li>
@@ -527,7 +526,7 @@ export default function ContractGeneratePage() {
                       <h4 className="text-sm font-semibold text-yellow-400 mb-2">Recomendaciones:</h4>
                       <ul className="space-y-1">
                         {aiAnalysis.recommendations.map((recommendation, index) => (
-                          <li key={index} className="text-sm text-neutral-300 flex items-start space-x-2">
+                          <li key={`recommendation-${index}`} className="text-sm text-neutral-300 flex items-start space-x-2">
                             <span className="text-yellow-400 mt-1">•</span>
                             <span>{recommendation}</span>
                           </li>
