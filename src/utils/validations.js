@@ -172,4 +172,88 @@ export const getFieldClasses = (status) => {
     default:
       return `${baseClasses} border-slate-600 focus:ring-2 focus:ring-primary-500 focus:border-primary-500`;
   }
+};
+
+// Función para validar datos de contrato
+export const validateContractData = (data, contractType) => {
+  const errors = {};
+  
+  // Validaciones básicas
+  if (!data.propertyAddress) {
+    errors.propertyAddress = 'La dirección de la propiedad es obligatoria';
+  }
+  
+  if (!data.propertyType) {
+    errors.propertyType = 'El tipo de propiedad es obligatorio';
+  }
+  
+  if (!data.ownerName) {
+    errors.ownerName = 'El nombre del propietario es obligatorio';
+  }
+  
+  if (!data.ownerDocument) {
+    errors.ownerDocument = 'El DNI del propietario es obligatorio';
+  }
+  
+  if (!data.tenantName) {
+    errors.tenantName = 'El nombre del inquilino es obligatorio';
+  }
+  
+  if (!data.tenantDocument) {
+    errors.tenantDocument = 'El DNI del inquilino es obligatorio';
+  }
+  
+  if (!data.startDate) {
+    errors.startDate = 'La fecha de inicio es obligatoria';
+  }
+  
+  if (!data.duration) {
+    errors.duration = 'La duración es obligatoria';
+  }
+  
+  if (!data.monthlyPrice) {
+    errors.monthlyPrice = 'El precio mensual es obligatorio';
+  }
+  
+  if (!data.deposit) {
+    errors.deposit = 'El depósito es obligatorio';
+  }
+  
+  return errors;
+};
+
+// Función para validar datos de recibo
+export const validateReceiptData = (data, receiptType) => {
+  const errors = {};
+  
+  // Validaciones básicas
+  if (!data.propertyAddress) {
+    errors.propertyAddress = 'La dirección de la propiedad es obligatoria';
+  }
+  
+  if (!data.propertyType) {
+    errors.propertyType = 'El tipo de propiedad es obligatorio';
+  }
+  
+  if (!data.tenantName) {
+    errors.tenantName = 'El nombre del inquilino es obligatorio';
+  }
+  
+  if (!data.tenantDocument) {
+    errors.tenantDocument = 'El DNI del inquilino es obligatorio';
+  }
+  
+  if (!data.period) {
+    errors.period = 'El período es obligatorio';
+  }
+  
+  if (!data.issueDate) {
+    errors.issueDate = 'La fecha de emisión es obligatoria';
+  }
+  
+  if (!data.baseRent) {
+    errors.baseRent = 'El alquiler base es obligatorio';
+  }
+  
+  return errors;
 }; 
