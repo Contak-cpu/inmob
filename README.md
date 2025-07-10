@@ -146,4 +146,4 @@ Este proyecto es propiedad de Konrad Inmobiliaria. Todos los derechos reservados
 
 ---
 
-⭐ Si este proyecto te ayuda, considera darle una estrella en GitHub! 
+⭐ Si este proyecto te ayuda, considera darle una estrella en GitHub!
