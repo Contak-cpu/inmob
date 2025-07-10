@@ -4,11 +4,10 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, FileText, Building, Store, CheckCircle, AlertCircle } from 'lucide-react';
 import { CONTRACT_TYPES } from '@/lib/config';
-import { ContractType } from '@/types';
 import PictoNSignature from '@/components/PictoNSignature';
 
 export default function ContractsPage() {
-  const [selectedType, setSelectedType] = useState<ContractType | ''>('');
+  const [selectedType, setSelectedType] = useState('');
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-neutral-900 via-neutral-800 to-neutral-900">
@@ -73,7 +72,7 @@ export default function ContractsPage() {
               {Object.entries(CONTRACT_TYPES).map(([key, contract]) => (
                 <button
                   key={key}
-                  onClick={() => setSelectedType(key as ContractType)}
+                  onClick={() => setSelectedType(key)}
                   className={`card transition-all duration-300 hover:scale-105 ${
                     selectedType === key 
                       ? 'ring-2 ring-primary-500 bg-neutral-700/50' 

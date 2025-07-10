@@ -2,43 +2,12 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Receipt, Home, Building, Wrench, Settings, FileText, CheckCircle, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Receipt, Building, Store, CheckCircle, AlertCircle } from 'lucide-react';
 import { RECEIPT_TYPES } from '@/lib/config';
-import { ReceiptType } from '@/types';
 import PictoNSignature from '@/components/PictoNSignature';
 
 export default function ReceiptsPage() {
-  const [selectedType, setSelectedType] = useState<ReceiptType | ''>('');
-
-  const getIcon = (type: string) => {
-    switch (type) {
-      case 'alquiler':
-        return <Home className="h-8 w-8 text-primary-400" />;
-      case 'expensas':
-        return <Building className="h-8 w-8 text-success-400" />;
-      case 'reparacion':
-        return <Wrench className="h-8 w-8 text-warning-400" />;
-      case 'servicios':
-        return <Settings className="h-8 w-8 text-secondary-400" />;
-      default:
-        return <FileText className="h-8 w-8 text-neutral-400" />;
-    }
-  };
-
-  const getBgColor = (type: string) => {
-    switch (type) {
-      case 'alquiler':
-        return 'bg-primary-500/20';
-      case 'expensas':
-        return 'bg-success-500/20';
-      case 'reparacion':
-        return 'bg-warning-500/20';
-      case 'servicios':
-        return 'bg-secondary-500/20';
-      default:
-        return 'bg-neutral-500/20';
-    }
-  };
+  const [selectedType, setSelectedType] = useState('');
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-neutral-900 via-neutral-800 to-neutral-900">
@@ -50,7 +19,7 @@ export default function ReceiptsPage() {
               <Link href="/" className="p-2 hover:bg-neutral-700/50 rounded-lg transition-colors">
                 <ArrowLeft className="h-5 w-5 text-neutral-400" />
               </Link>
-              <Receipt className="h-8 w-8 text-success-400" />
+              <Receipt className="h-8 w-8 text-secondary-400" />
               <div>
                 <h1 className="text-xl font-bold text-white">Generador de Recibos</h1>
                 <p className="text-sm text-neutral-400">Selecciona el tipo de recibo</p>
@@ -71,7 +40,7 @@ export default function ReceiptsPage() {
           <div className="mb-8">
             <div className="flex items-center justify-center space-x-4">
               <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-success-500 rounded-full flex items-center justify-center">
+                <div className="w-8 h-8 bg-secondary-500 rounded-full flex items-center justify-center">
                   <span className="text-white text-sm font-medium">1</span>
                 </div>
                 <span className="text-white font-medium">Tipo de Recibo</span>
@@ -99,39 +68,47 @@ export default function ReceiptsPage() {
               ¿Qué tipo de recibo necesitas?
             </h2>
             
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-2 gap-6">
               {Object.entries(RECEIPT_TYPES).map(([key, receipt]) => (
                 <button
                   key={key}
-                  onClick={() => setSelectedType(key as ReceiptType)}
+                  onClick={() => setSelectedType(key)}
                   className={`card transition-all duration-300 hover:scale-105 ${
                     selectedType === key 
-                      ? 'ring-2 ring-success-500 bg-neutral-700/50' 
+                      ? 'ring-2 ring-secondary-500 bg-neutral-700/50' 
                       : 'hover:bg-neutral-700/50'
                   }`}
                 >
                   <div className="flex items-center space-x-4 mb-4">
-                    <div className={`p-3 rounded-xl ${getBgColor(key)}`}>
-                      {getIcon(key)}
+                    <div className={`p-3 rounded-xl ${
+                      key === 'alquiler' 
+                        ? 'bg-secondary-500/20' 
+                        : 'bg-primary-500/20'
+                    }`}>
+                      {key === 'alquiler' ? (
+                        <Building className="h-8 w-8 text-secondary-400" />
+                      ) : (
+                        <Store className="h-8 w-8 text-primary-400" />
+                      )}
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold text-white">{receipt.name}</h3>
-                      <p className="text-neutral-400 text-sm">{receipt.description}</p>
+                      <h3 className="text-xl font-semibold text-white">{receipt.name}</h3>
+                      <p className="text-neutral-400">{receipt.description}</p>
                     </div>
                   </div>
                   
                   <div className="space-y-2">
                     <div className="flex items-center space-x-2">
                       <CheckCircle className="h-4 w-4 text-success-400" />
-                      <span className="text-sm text-neutral-300">Múltiples conceptos</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <CheckCircle className="h-4 w-4 text-success-400" />
-                      <span className="text-sm text-neutral-300">Cálculos automáticos</span>
+                      <span className="text-sm text-neutral-300">Cálculo automático</span>
                     </div>
                     <div className="flex items-center space-x-2">
                       <CheckCircle className="h-4 w-4 text-success-400" />
                       <span className="text-sm text-neutral-300">Formato profesional</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <CheckCircle className="h-4 w-4 text-success-400" />
+                      <span className="text-sm text-neutral-300">Descarga inmediata</span>
                     </div>
                   </div>
                 </button>
@@ -144,7 +121,7 @@ export default function ReceiptsPage() {
             <div className="text-center">
               <Link 
                 href={`/receipts/${selectedType}`}
-                className="btn-success inline-flex items-center space-x-2"
+                className="btn-secondary inline-flex items-center space-x-2"
               >
                 <span>Continuar</span>
                 <Receipt className="h-4 w-4" />
@@ -155,16 +132,16 @@ export default function ReceiptsPage() {
           {/* Info Section */}
           <div className="mt-12 p-6 glass-effect rounded-xl">
             <div className="flex items-start space-x-4">
-              <AlertCircle className="h-6 w-6 text-success-400 mt-1" />
+              <AlertCircle className="h-6 w-6 text-secondary-400 mt-1" />
               <div>
                 <h3 className="text-lg font-semibold text-white mb-2">
                   Información Importante
                 </h3>
                 <div className="space-y-2 text-sm text-neutral-300">
-                  <p>• Puedes agregar múltiples conceptos al recibo</p>
-                  <p>• Los totales se calculan automáticamente</p>
-                  <p>• El recibo incluye números en palabras</p>
-                  <p>• Formato legal argentino con validez contable</p>
+                  <p>• Todos los campos marcados con * son obligatorios</p>
+                  <p>• Los cálculos se realizan automáticamente</p>
+                  <p>• El recibo incluye todos los detalles requeridos</p>
+                  <p>• Puedes descargar el recibo en formato PDF</p>
                 </div>
               </div>
             </div>
