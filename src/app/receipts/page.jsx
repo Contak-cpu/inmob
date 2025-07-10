@@ -1,33 +1,32 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Receipt, Building, Store, CheckCircle, AlertCircle } from 'lucide-react';
+import { Home, Building, Wrench, Settings, FileText } from 'lucide-react';
 import { RECEIPT_TYPES } from '@/lib/config';
 import PictoNSignature from '@/components/PictoNSignature';
 
-export default function ReceiptsPage() {
-  const [selectedType, setSelectedType] = useState('');
+const receiptTypeIcons = {
+  alquiler: { icon: <Home className="h-8 w-8" />, color: 'primary', bg: 'bg-primary-500/20', border: 'border-primary-500/30', text: 'text-primary-400' },
+  expensas: { icon: <Building className="h-8 w-8" />, color: 'secondary', bg: 'bg-secondary-500/20', border: 'border-secondary-500/30', text: 'text-secondary-400' },
+  reparacion: { icon: <Wrench className="h-8 w-8" />, color: 'danger', bg: 'bg-red-500/20', border: 'border-red-500/30', text: 'text-red-400' },
+  servicios: { icon: <Settings className="h-8 w-8" />, color: 'success', bg: 'bg-success-500/20', border: 'border-success-500/30', text: 'text-success-400' },
+  otros: { icon: <FileText className="h-8 w-8" />, color: 'muted', bg: 'bg-neutral-500/20', border: 'border-neutral-500/30', text: 'text-neutral-400' },
+};
 
+export default function ReceiptsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-neutral-900 via-neutral-800 to-neutral-900">
       {/* Header */}
       <header className="glass-effect border-b border-neutral-700/50">
         <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-center">
             <div className="flex items-center space-x-3">
-              <Link href="/" className="p-2 hover:bg-neutral-700/50 rounded-lg transition-colors">
-                <ArrowLeft className="h-5 w-5 text-neutral-400" />
-              </Link>
-              <Receipt className="h-8 w-8 text-secondary-400" />
-              <div>
-                <h1 className="text-xl font-bold text-white">Generador de Recibos</h1>
-                <p className="text-sm text-neutral-400">Selecciona el tipo de recibo</p>
+              <FileText className="h-8 w-8 text-primary-400" />
+              <div className="text-center">
+                <h1 className="text-xl font-bold text-white">Recibos Konrad</h1>
+                <p className="text-sm text-neutral-400">Selecciona el tipo de recibo a generar</p>
               </div>
-            </div>
-            <div className="text-right">
-              <p className="text-sm text-neutral-400">KONRAD Inmobiliaria</p>
-              <p className="text-xs text-neutral-500">Mat. 573</p>
             </div>
           </div>
         </div>
@@ -35,113 +34,64 @@ export default function ReceiptsPage() {
 
       {/* Main Content */}
       <main className="container mx-auto px-6 py-12">
-        <div className="max-w-4xl mx-auto">
-          {/* Step Indicator */}
-          <div className="mb-8">
-            <div className="flex items-center justify-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-secondary-500 rounded-full flex items-center justify-center">
-                  <span className="text-white text-sm font-medium">1</span>
-                </div>
-                <span className="text-white font-medium">Tipo de Recibo</span>
-              </div>
-              <div className="w-12 h-0.5 bg-neutral-600"></div>
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-neutral-600 rounded-full flex items-center justify-center">
-                  <span className="text-neutral-400 text-sm font-medium">2</span>
-                </div>
-                <span className="text-neutral-400 font-medium">Datos</span>
-              </div>
-              <div className="w-12 h-0.5 bg-neutral-600"></div>
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-neutral-600 rounded-full flex items-center justify-center">
-                  <span className="text-neutral-400 text-sm font-medium">3</span>
-                </div>
-                <span className="text-neutral-400 font-medium">Generar</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Receipt Type Selection */}
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-white mb-6 text-center">
-              ¿Qué tipo de recibo necesitas?
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-white mb-4">
+              Tipos de <span className="text-gradient-primary">Recibos</span>
             </h2>
-            
-            <div className="grid md:grid-cols-2 gap-6">
-              {Object.entries(RECEIPT_TYPES).map(([key, receipt]) => (
-                <button
-                  key={key}
-                  onClick={() => setSelectedType(key)}
-                  className={`card transition-all duration-300 hover:scale-105 ${
-                    selectedType === key 
-                      ? 'ring-2 ring-secondary-500 bg-neutral-700/50' 
-                      : 'hover:bg-neutral-700/50'
-                  }`}
-                >
-                  <div className="flex items-center space-x-4 mb-4">
-                    <div className={`p-3 rounded-xl ${
-                      key === 'alquiler' 
-                        ? 'bg-secondary-500/20' 
-                        : 'bg-primary-500/20'
-                    }`}>
-                      {key === 'alquiler' ? (
-                        <Building className="h-8 w-8 text-secondary-400" />
-                      ) : (
-                        <Store className="h-8 w-8 text-primary-400" />
-                      )}
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-semibold text-white">{receipt.name}</h3>
-                      <p className="text-neutral-400">{receipt.description}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <CheckCircle className="h-4 w-4 text-success-400" />
-                      <span className="text-sm text-neutral-300">Cálculo automático</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <CheckCircle className="h-4 w-4 text-success-400" />
-                      <span className="text-sm text-neutral-300">Formato profesional</span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <CheckCircle className="h-4 w-4 text-success-400" />
-                      <span className="text-sm text-neutral-300">Descarga inmediata</span>
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
+            <p className="text-lg text-neutral-300 max-w-2xl mx-auto">
+              Elige el tipo de recibo que necesitas. Cada uno tiene campos y diseño únicos.
+            </p>
           </div>
 
-          {/* Continue Button */}
-          {selectedType && (
-            <div className="text-center">
-              <Link 
-                href={`/receipts/${selectedType}`}
-                className="btn-secondary inline-flex items-center space-x-2"
-              >
-                <span>Continuar</span>
-                <Receipt className="h-4 w-4" />
-              </Link>
-            </div>
-          )}
+          {/* Receipt Types Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+            {Object.entries(RECEIPT_TYPES).map(([type, data]) => {
+              const iconData = receiptTypeIcons[type] || receiptTypeIcons.otros;
+              return (
+                <Link key={type} href={`/receipts/${type}`} className="group">
+                  <div className={`card card-hover group-hover:scale-105 border ${iconData.border} hover:bg-neutral-800/60 transition-all duration-200`}>
+                    <div className={`flex items-center space-x-4 mb-4`}>
+                      <div className={`p-3 rounded-xl ${iconData.bg}`}>
+                        <span className={iconData.text}>{iconData.icon}</span>
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-semibold text-white">{data.name}</h3>
+                        <p className="text-sm text-neutral-400">{data.description}</p>
+                      </div>
+                    </div>
+                    <div className="mt-4 pt-4 border-t border-neutral-700">
+                      <div className={`flex items-center ${iconData.text} group-hover:translate-x-1 transition-transform`}>
+                        <span className="font-medium">Comenzar</span>
+                        <svg className="h-4 w-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
 
           {/* Info Section */}
-          <div className="mt-12 p-6 glass-effect rounded-xl">
-            <div className="flex items-start space-x-4">
-              <AlertCircle className="h-6 w-6 text-secondary-400 mt-1" />
-              <div>
-                <h3 className="text-lg font-semibold text-white mb-2">
-                  Información Importante
-                </h3>
-                <div className="space-y-2 text-sm text-neutral-300">
-                  <p>• Todos los campos marcados con * son obligatorios</p>
-                  <p>• Los cálculos se realizan automáticamente</p>
-                  <p>• El recibo incluye todos los detalles requeridos</p>
-                  <p>• Puedes descargar el recibo en formato PDF</p>
+          <div className="mt-12 p-8 glass-effect rounded-xl">
+            <div className="text-center">
+              <h3 className="text-xl font-semibold text-white mb-4">
+                ¿Para qué sirve cada recibo?
+              </h3>
+              <div className="grid md:grid-cols-3 gap-6 text-sm text-neutral-300">
+                <div>
+                  <h4 className="font-semibold text-primary-400 mb-2">Alquiler</h4>
+                  <p>Recibo mensual para inquilinos, con detalle de alquiler y pagos.</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-red-400 mb-2">Reparaciones</h4>
+                  <p>Recibo para gastos de arreglos, materiales y mano de obra.</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-success-400 mb-2">Servicios</h4>
+                  <p>Recibo para servicios prestados (limpieza, mantenimiento, etc).</p>
                 </div>
               </div>
             </div>
@@ -154,7 +104,7 @@ export default function ReceiptsPage() {
         <div className="container mx-auto px-6 py-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
             <p className="text-xs sm:text-sm text-neutral-400">
-              © 2024 KONRAD Inmobiliaria. Todos los derechos reservados.
+              © 2013 Konrad Inversiones + Desarrollos Inmobiliarios. Todos los derechos reservados.
             </p>
             <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4">
               <p className="text-[10px] sm:text-xs text-neutral-500">
