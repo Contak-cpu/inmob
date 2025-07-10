@@ -340,20 +340,18 @@ export default function ContractForm({
               value={localFormData.adjustmentType || contract?.adjustmentType || ''}
               onChange={(e) => handleInputChange('adjustmentType', e.target.value)}
               className={`input-field ${errors.adjustmentType ? 'border-error-500' : ''}`}
-              disabled={contract?.adjustmentType}
             >
               <option value="">Seleccionar tipo de ajuste</option>
-              <option value="IPC">IPC</option>
-              <option value="DNU_IPC">DNU IPC</option>
-              <option value="DNU_ICL">DNU ICL</option>
-              <option value="EMPRESAS">Empresas</option>
+              <option value="IPC">IPC - Índice de Precios al Consumidor</option>
+              <option value="ICL">ICL - Índice de Contratos de Locación</option>
+              <option value="EMPRESAS">Empresas - Ajuste específico para empresas</option>
             </select>
             {errors.adjustmentType && (
               <p className="text-error-400 text-sm mt-1">{errors.adjustmentType}</p>
             )}
-            {contract?.adjustmentType && (
+            {contract?.adjustmentType && !localFormData.adjustmentType && (
               <p className="text-primary-400 text-sm mt-1">
-                Ajuste automático según el tipo de contrato: {ADJUSTMENT_TYPES[contract.adjustmentType]?.name}
+                Sugerencia: {ADJUSTMENT_TYPES[contract.adjustmentType]?.name} - {ADJUSTMENT_TYPES[contract.adjustmentType]?.description}
               </p>
             )}
           </div>

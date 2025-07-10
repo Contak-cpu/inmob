@@ -57,7 +57,7 @@ SEGUNDO: Que las partes acuerdan celebrar un contrato de locación comercial por
 de ${data.duration} meses, a partir del ${formatDate(data.startDate)}.
 
 TERCERO: Que el precio mensual acordado es de ${formatCurrency(data.monthlyPrice)} 
-(${data.monthlyPrice} pesos), con ajuste según IPC.
+(${data.monthlyPrice} pesos), con ajuste según ${data.adjustmentType}.
 
 CLÁUSULAS:
 
@@ -68,7 +68,7 @@ SEGUNDA - PLAZO: El contrato tendrá una duración de ${data.duration} meses,
 iniciándose el ${formatDate(data.startDate)}.
 
 TERCERA - PRECIO: El precio mensual es de ${formatCurrency(data.monthlyPrice)} 
-(${data.monthlyPrice} pesos), pagadero por adelantado, con ajuste según IPC.
+(${data.monthlyPrice} pesos), pagadero por adelantado, con ajuste según ${data.adjustmentType}.
 
 CUARTA - DEPÓSITO: Se establece un depósito de ${data.deposit} mes(es) 
 (${formatCurrency(data.monthlyPrice * data.deposit)}), que será devuelto al finalizar el contrato.
@@ -127,7 +127,7 @@ SEGUNDO: Que las partes acuerdan celebrar un contrato de locación de vivienda f
 por el plazo de ${data.duration} meses, a partir del ${formatDate(data.startDate)}.
 
 TERCERO: Que el precio mensual acordado es de ${formatCurrency(data.monthlyPrice)} 
-(${data.monthlyPrice} pesos), con ajuste según ICL.
+(${data.monthlyPrice} pesos), con ajuste según ${data.adjustmentType}.
 
 CLÁUSULAS:
 
@@ -138,7 +138,7 @@ SEGUNDA - PLAZO: El contrato tendrá una duración de ${data.duration} meses,
 iniciándose el ${formatDate(data.startDate)}.
 
 TERCERA - PRECIO: El precio mensual es de ${formatCurrency(data.monthlyPrice)} 
-(${data.monthlyPrice} pesos), pagadero por adelantado, con ajuste según ICL.
+(${data.monthlyPrice} pesos), pagadero por adelantado, con ajuste según ${data.adjustmentType}.
 
 CUARTA - DEPÓSITO: Se establece un depósito de ${data.deposit} mes(es) 
 (${formatCurrency(data.monthlyPrice * data.deposit)}), que será devuelto al finalizar el contrato.
@@ -197,7 +197,7 @@ SEGUNDO: Que las partes acuerdan celebrar un contrato de locación empresarial
 por el plazo de ${data.duration} meses, a partir del ${formatDate(data.startDate)}.
 
 TERCERO: Que el precio mensual acordado es de ${formatCurrency(data.monthlyPrice)} 
-(${data.monthlyPrice} pesos), con ajuste según EMPRESAS.
+(${data.monthlyPrice} pesos), con ajuste según ${data.adjustmentType}.
 
 CLÁUSULAS:
 
@@ -208,7 +208,7 @@ SEGUNDA - PLAZO: El contrato tendrá una duración de ${data.duration} meses,
 iniciándose el ${formatDate(data.startDate)}.
 
 TERCERA - PRECIO: El precio mensual es de ${formatCurrency(data.monthlyPrice)} 
-(${data.monthlyPrice} pesos), pagadero por adelantado, con ajuste según EMPRESAS.
+(${data.monthlyPrice} pesos), pagadero por adelantado, con ajuste según ${data.adjustmentType}.
 
 CUARTA - DEPÓSITO: Se establece un depósito de ${data.deposit} mes(es) 
 (${formatCurrency(data.monthlyPrice * data.deposit)}), que será devuelto al finalizar el contrato.
