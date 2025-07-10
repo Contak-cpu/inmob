@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Download, Printer, Share2, FileText, CheckCircle, AlertCircle } from 'lucide-react';
 import { CONTRACT_TYPES, ADJUSTMENT_TYPES } from '@/lib/config';
 import { formatCurrency, formatDate } from '@/utils/formatters';
+import { generateContract, downloadContract } from '@/utils/contractGenerator';
 import PictoNSignature from '@/components/PictoNSignature';
 
 export default function ContractGeneratePage() {
@@ -85,8 +86,14 @@ export default function ContractGeneratePage() {
   };
 
   const handleDownload = () => {
-    // Simular descarga
-    console.log('Descargando contrato...');
+    try {
+      const contractText = generateContract(contractData, contractType);
+      const fileName = `Contrato_${contract.name.replace(/\s+/g, '_')}_${formatDate(new Date()).replace(/\//g, '-')}.txt`;
+      downloadContract(contractText, fileName);
+    } catch (error) {
+      console.error('Error generando contrato:', error);
+      alert('Error al generar el contrato');
+    }
   };
 
   const handlePrint = () => {

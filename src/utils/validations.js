@@ -219,8 +219,23 @@ export const validateContractData = (data, contractType) => {
     errors.deposit = 'El depósito es obligatorio';
   }
   
-  if (!data.adjustmentType) {
-    errors.adjustmentType = 'El tipo de ajuste es obligatorio';
+  // Validaciones específicas según el tipo de contrato
+  if (contractType === 'comercial_ipc') {
+    if (!data.adjustmentType || data.adjustmentType !== 'IPC') {
+      errors.adjustmentType = 'El contrato comercial debe usar ajuste IPC';
+    }
+  } else if (contractType === 'casa_dnu_icl') {
+    if (!data.adjustmentType || data.adjustmentType !== 'DNU_ICL') {
+      errors.adjustmentType = 'El contrato casa debe usar ajuste DNU ICL';
+    }
+  } else if (contractType === 'casa_dnu_ipc') {
+    if (!data.adjustmentType || data.adjustmentType !== 'DNU_IPC') {
+      errors.adjustmentType = 'El contrato casa debe usar ajuste DNU IPC';
+    }
+  } else if (contractType === 'casa_empresas') {
+    if (!data.adjustmentType || data.adjustmentType !== 'EMPRESAS') {
+      errors.adjustmentType = 'El contrato para empresas debe usar ajuste específico';
+    }
   }
   
   return errors;

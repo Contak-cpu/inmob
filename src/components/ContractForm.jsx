@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Calendar, MapPin, User, Building, DollarSign, FileText, AlertCircle } from 'lucide-react';
-import { CONTRACT_TYPES } from '@/lib/config';
+import { CONTRACT_TYPES, ADJUSTMENT_TYPES } from '@/lib/config';
 import { formatCurrency, formatDate } from '@/utils/formatters';
 
 export default function ContractForm({
@@ -338,19 +338,24 @@ export default function ContractForm({
               Tipo de Ajuste *
             </label>
             <select
-              value={localFormData.adjustmentType || ''}
+              value={localFormData.adjustmentType || contract?.adjustmentType || ''}
               onChange={(e) => handleInputChange('adjustmentType', e.target.value)}
               className={`input-field ${errors.adjustmentType ? 'border-error-500' : ''}`}
+              disabled={contract?.adjustmentType}
             >
               <option value="">Seleccionar tipo de ajuste</option>
-              <option value="CVS_CER">CVS CER</option>
-              <option value="CVS_ICL">CVS ICL</option>
+              <option value="IPC">IPC</option>
               <option value="DNU_IPC">DNU IPC</option>
               <option value="DNU_ICL">DNU ICL</option>
-              <option value="ninguno">Sin ajuste</option>
+              <option value="EMPRESAS">Empresas</option>
             </select>
             {errors.adjustmentType && (
               <p className="text-error-400 text-sm mt-1">{errors.adjustmentType}</p>
+            )}
+            {contract?.adjustmentType && (
+              <p className="text-primary-400 text-sm mt-1">
+                Ajuste automático según el tipo de contrato: {ADJUSTMENT_TYPES[contract.adjustmentType]?.name}
+              </p>
             )}
           </div>
         </div>
