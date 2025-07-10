@@ -1,0 +1,193 @@
+'use client';
+
+import React, { useState } from 'react';
+import Link from 'next/link';
+import { ArrowLeft, Receipt, Home, Building, Wrench, Settings, FileText, CheckCircle, AlertCircle } from 'lucide-react';
+import { RECEIPT_TYPES } from '@/lib/config';
+import { ReceiptType } from '@/types';
+import PictoNSignature from '@/components/PictoNSignature';
+
+export default function ReceiptsPage() {
+  const [selectedType, setSelectedType] = useState<ReceiptType | ''>('');
+
+  const getIcon = (type: string) => {
+    switch (type) {
+      case 'alquiler':
+        return <Home className="h-8 w-8 text-primary-400" />;
+      case 'expensas':
+        return <Building className="h-8 w-8 text-success-400" />;
+      case 'reparacion':
+        return <Wrench className="h-8 w-8 text-warning-400" />;
+      case 'servicios':
+        return <Settings className="h-8 w-8 text-secondary-400" />;
+      default:
+        return <FileText className="h-8 w-8 text-neutral-400" />;
+    }
+  };
+
+  const getBgColor = (type: string) => {
+    switch (type) {
+      case 'alquiler':
+        return 'bg-primary-500/20';
+      case 'expensas':
+        return 'bg-success-500/20';
+      case 'reparacion':
+        return 'bg-warning-500/20';
+      case 'servicios':
+        return 'bg-secondary-500/20';
+      default:
+        return 'bg-neutral-500/20';
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-neutral-900 via-neutral-800 to-neutral-900">
+      {/* Header */}
+      <header className="glass-effect border-b border-neutral-700/50">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <Link href="/" className="p-2 hover:bg-neutral-700/50 rounded-lg transition-colors">
+                <ArrowLeft className="h-5 w-5 text-neutral-400" />
+              </Link>
+              <Receipt className="h-8 w-8 text-success-400" />
+              <div>
+                <h1 className="text-xl font-bold text-white">Generador de Recibos</h1>
+                <p className="text-sm text-neutral-400">Selecciona el tipo de recibo</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-sm text-neutral-400">KONRAD Inmobiliaria</p>
+              <p className="text-xs text-neutral-500">Mat. 573</p>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="container mx-auto px-6 py-12">
+        <div className="max-w-4xl mx-auto">
+          {/* Step Indicator */}
+          <div className="mb-8">
+            <div className="flex items-center justify-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-success-500 rounded-full flex items-center justify-center">
+                  <span className="text-white text-sm font-medium">1</span>
+                </div>
+                <span className="text-white font-medium">Tipo de Recibo</span>
+              </div>
+              <div className="w-12 h-0.5 bg-neutral-600"></div>
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-neutral-600 rounded-full flex items-center justify-center">
+                  <span className="text-neutral-400 text-sm font-medium">2</span>
+                </div>
+                <span className="text-neutral-400 font-medium">Datos</span>
+              </div>
+              <div className="w-12 h-0.5 bg-neutral-600"></div>
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-neutral-600 rounded-full flex items-center justify-center">
+                  <span className="text-neutral-400 text-sm font-medium">3</span>
+                </div>
+                <span className="text-neutral-400 font-medium">Generar</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Receipt Type Selection */}
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-white mb-6 text-center">
+              ¿Qué tipo de recibo necesitas?
+            </h2>
+            
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {Object.entries(RECEIPT_TYPES).map(([key, receipt]) => (
+                <button
+                  key={key}
+                  onClick={() => setSelectedType(key as ReceiptType)}
+                  className={`card transition-all duration-300 hover:scale-105 ${
+                    selectedType === key 
+                      ? 'ring-2 ring-success-500 bg-neutral-700/50' 
+                      : 'hover:bg-neutral-700/50'
+                  }`}
+                >
+                  <div className="flex items-center space-x-4 mb-4">
+                    <div className={`p-3 rounded-xl ${getBgColor(key)}`}>
+                      {getIcon(key)}
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-white">{receipt.name}</h3>
+                      <p className="text-neutral-400 text-sm">{receipt.description}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <CheckCircle className="h-4 w-4 text-success-400" />
+                      <span className="text-sm text-neutral-300">Múltiples conceptos</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <CheckCircle className="h-4 w-4 text-success-400" />
+                      <span className="text-sm text-neutral-300">Cálculos automáticos</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <CheckCircle className="h-4 w-4 text-success-400" />
+                      <span className="text-sm text-neutral-300">Formato profesional</span>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Continue Button */}
+          {selectedType && (
+            <div className="text-center">
+              <Link 
+                href={`/receipts/${selectedType}`}
+                className="btn-success inline-flex items-center space-x-2"
+              >
+                <span>Continuar</span>
+                <Receipt className="h-4 w-4" />
+              </Link>
+            </div>
+          )}
+
+          {/* Info Section */}
+          <div className="mt-12 p-6 glass-effect rounded-xl">
+            <div className="flex items-start space-x-4">
+              <AlertCircle className="h-6 w-6 text-success-400 mt-1" />
+              <div>
+                <h3 className="text-lg font-semibold text-white mb-2">
+                  Información Importante
+                </h3>
+                <div className="space-y-2 text-sm text-neutral-300">
+                  <p>• Puedes agregar múltiples conceptos al recibo</p>
+                  <p>• Los totales se calculan automáticamente</p>
+                  <p>• El recibo incluye números en palabras</p>
+                  <p>• Formato legal argentino con validez contable</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="glass-effect border-t border-neutral-700/50 mt-8">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
+            <p className="text-xs sm:text-sm text-neutral-400">
+              © 2024 KONRAD Inmobiliaria. Todos los derechos reservados.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4">
+              <p className="text-[10px] sm:text-xs text-neutral-500">
+                Sistema v1.0.0
+              </p>
+              <PictoNSignature />
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+} 
