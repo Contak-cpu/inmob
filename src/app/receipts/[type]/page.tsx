@@ -22,7 +22,7 @@ export default function ReceiptFormPage({ params }: PageProps) {
   const [fieldErrors, setFieldErrors] = useState<FieldValidation>({});
   const [touchedFields, setTouchedFields] = useState<TouchedFields>({});
   const [generatedReceipt, setGeneratedReceipt] = useState('');
-  const [receiptDate, setReceiptDate] = useState(new Date().toISOString().split('T')[0]);
+  const [receiptDate, setReceiptDate] = useState<string>('2024-01-01');
 
   // Estado inicial del formulario
   const [clientData, setClientData] = useState<ClientData>({
@@ -210,7 +210,7 @@ Conserve este comprobante para sus registros contables.
               onGenerate={generateReceipt}
               isFormValid={isFormValid()}
               receiptType={type}
-              receiptDate={receiptDate}
+              receiptDate={receiptDate || new Date().toISOString().split('T')[0]}
               onDateChange={setReceiptDate}
             />
           ) : (
