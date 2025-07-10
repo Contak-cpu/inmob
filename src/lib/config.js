@@ -1,6 +1,6 @@
 // Configuración de la empresa
 export const COMPANY_CONFIG = {
-  companyName: 'KONRAD Inversiones + Desarrollos Inmobiliarios',
+  companyName: 'Konrad Inversiones + Desarrollos Inmobiliarios',
   companyAddress: 'calle AMEGHINO Nº 602, Santa Rosa, La Pampa',
   companyPhone: '+54 2954 123456',
   companyEmail: 'info@konradinmobiliaria.com',

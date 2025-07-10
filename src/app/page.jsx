@@ -10,16 +10,13 @@ export default function HomePage() {
       <header className="glass-effect border-b border-neutral-700/50">
         <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
-            <div className="flex items-center space-x-3">
-              <Building className="h-7 w-7 sm:h-8 sm:w-8 text-primary-400" />
-              <div>
-                <h1 className="text-lg sm:text-xl font-bold text-white">KONRAD Inmobiliaria</h1>
-                <p className="text-xs sm:text-sm text-neutral-400">Sistema de Generadores</p>
+            <div className="flex items-center justify-center w-full">
+              <div className="flex items-center space-x-3">
+                <Building className="h-7 w-7 sm:h-8 sm:w-8 text-primary-400" />
+                <div className="text-center">
+                  <h1 className="text-lg sm:text-xl font-bold text-white">Konrad Inversiones + Desarrollos Inmobiliarios</h1>
+                </div>
               </div>
-            </div>
-            <div className="text-left sm:text-right">
-              <p className="text-xs sm:text-sm text-neutral-400">Santa Rosa, La Pampa</p>
-              <p className="text-[10px] sm:text-xs text-neutral-500">Mat. 573</p>
             </div>
           </div>
         </div>
@@ -138,7 +135,7 @@ export default function HomePage() {
         <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
             <p className="text-xs sm:text-sm text-neutral-400">
-              © 2024 KONRAD Inmobiliaria. Todos los derechos reservados.
+              © 2013 Konrad Inversiones + Desarrollos Inmobiliarios. Todos los derechos reservados.
             </p>
             <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4">
               <p className="text-[10px] sm:text-xs text-neutral-500">

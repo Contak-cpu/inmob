@@ -2,10 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, Download, Printer, Share2, FileText, CheckCircle, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Download, Printer, Share2, FileText, CheckCircle, AlertCircle, Brain } from 'lucide-react';
 import { CONTRACT_TYPES, ADJUSTMENT_TYPES } from '@/lib/config';
 import { formatCurrency, formatDate } from '@/utils/formatters';
 import { generateContract, downloadContract } from '@/utils/contractGenerator';
+import { aiAnalyzer } from '@/utils/aiContractAnalyzer';
 import PictoNSignature from '@/components/PictoNSignature';
 
 export default function ContractGeneratePage() {
@@ -16,6 +17,8 @@ export default function ContractGeneratePage() {
   const [contractData, setContractData] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isGenerated, setIsGenerated] = useState(false);
+  const [aiAnalysis, setAiAnalysis] = useState(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   useEffect(() => {
     // Simular datos del contrato (en un caso real vendrían de la página anterior)
@@ -73,15 +76,25 @@ export default function ContractGeneratePage() {
 
   const handleGenerate = async () => {
     setIsGenerating(true);
+    setIsAnalyzing(true);
     
     try {
       // Simular generación del contrato
       await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Generar contrato
+      const contractText = generateContract(contractData, contractType);
+      
+      // Analizar con IA
+      const analysis = await aiAnalyzer.compareWithRealTemplate(contractText, contractType);
+      setAiAnalysis(analysis);
+      
       setIsGenerated(true);
     } catch (error) {
       console.error('Error generating contract:', error);
     } finally {
       setIsGenerating(false);
+      setIsAnalyzing(false);
     }
   };
 
@@ -104,6 +117,43 @@ export default function ContractGeneratePage() {
   const handleShare = () => {
     // Simular compartir
     console.log('Compartiendo contrato...');
+  };
+
+  const handleTestContract = () => {
+    // Generar datos de prueba según el tipo de contrato
+    const testData = {
+      propertyAddress: 'Av. Test 123, CABA',
+      propertyType: contractType.includes('comercial') ? 'local' : 'casa',
+      surface: '100',
+      rooms: '4',
+      ownerName: 'Juan Pérez Test',
+      ownerDocument: '12345678',
+      ownerPhone: '+54 11 1234-5678',
+      ownerEmail: 'juan.test@email.com',
+      tenantName: 'María González Test',
+      tenantDocument: '87654321',
+      tenantPhone: '+54 11 8765-4321',
+      tenantEmail: 'maria.test@email.com',
+      startDate: '2024-01-01',
+      duration: '12',
+      monthlyPrice: '150000',
+      deposit: '1',
+      adjustmentType: contract?.adjustmentType || 'IPC',
+      expensesIncluded: 'todos',
+      petsAllowed: 'consultar',
+      guarantor1Name: 'Carlos López Test',
+      guarantor1Document: '11223344',
+      guarantor1Phone: '+54 11 1122-3344',
+      guarantor1Email: 'carlos.test@email.com',
+      guarantor2Name: 'Ana Martínez Test',
+      guarantor2Document: '44332211',
+      guarantor2Phone: '+54 11 4433-2211',
+      guarantor2Email: 'ana.test@email.com',
+      observations: 'Contrato de prueba generado automáticamente.'
+    };
+
+    setContractData(testData);
+    setIsGenerated(false);
   };
 
   const getAdjustmentTypeName = (type) => {
@@ -370,8 +420,17 @@ export default function ContractGeneratePage() {
                 </div>
               )}
 
-              {/* Generate Button */}
-              <div className="flex justify-end pt-6 border-t border-neutral-700">
+              {/* Generate Buttons */}
+              <div className="flex justify-end space-x-4 pt-6 border-t border-neutral-700">
+                <button
+                  onClick={handleTestContract}
+                  className="btn-secondary"
+                >
+                  <div className="flex items-center space-x-2">
+                    <FileText className="h-4 w-4" />
+                    <span>Test Contrato</span>
+                  </div>
+                </button>
                 <button
                   onClick={handleGenerate}
                   disabled={isGenerating}
@@ -380,12 +439,12 @@ export default function ContractGeneratePage() {
                   {isGenerating ? (
                     <div className="flex items-center space-x-2">
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                      <span>Generando...</span>
+                      <span>{isAnalyzing ? 'Analizando con IA...' : 'Generando...'}</span>
                     </div>
                   ) : (
                     <div className="flex items-center space-x-2">
-                      <FileText className="h-4 w-4" />
-                      <span>Generar Contrato</span>
+                      <Brain className="h-4 w-4" />
+                      <span>Generar y Analizar</span>
                     </div>
                   )}
                 </button>
@@ -403,6 +462,81 @@ export default function ContractGeneratePage() {
                   El contrato ha sido generado y está listo para descargar
                 </p>
               </div>
+
+              {/* AI Analysis Section */}
+              {aiAnalysis && (
+                <div className="mb-8 p-6 bg-neutral-800 rounded-lg border border-neutral-700">
+                  <div className="flex items-center space-x-2 mb-4">
+                    <Brain className="h-5 w-5 text-blue-400" />
+                    <h3 className="text-lg font-semibold text-white">Análisis de IA</h3>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div className="text-center p-3 bg-neutral-700 rounded-lg">
+                      <div className="text-2xl font-bold text-white mb-1">
+                        {Math.round(aiAnalysis.confidence * 100)}%
+                      </div>
+                      <div className="text-sm text-neutral-400">Confianza</div>
+                    </div>
+                    <div className="text-center p-3 bg-neutral-700 rounded-lg">
+                      <div className="text-2xl font-bold text-white mb-1">
+                        {aiAnalysis.analysis.score}/{aiAnalysis.analysis.maxScore}
+                      </div>
+                      <div className="text-sm text-neutral-400">Puntuación</div>
+                    </div>
+                    <div className="text-center p-3 bg-neutral-700 rounded-lg">
+                      <div className={`text-2xl font-bold mb-1 ${
+                        aiAnalysis.status === 'APPROVED' ? 'text-green-400' : 'text-yellow-400'
+                      }`}>
+                        {aiAnalysis.status === 'APPROVED' ? '✓' : '⚠'}
+                      </div>
+                      <div className="text-sm text-neutral-400">Estado</div>
+                    </div>
+                  </div>
+
+                  {aiAnalysis.analysis.issues.length > 0 && (
+                    <div className="mb-4">
+                      <h4 className="text-sm font-semibold text-red-400 mb-2">Problemas Detectados:</h4>
+                      <ul className="space-y-1">
+                        {aiAnalysis.analysis.issues.map((issue, index) => (
+                          <li key={index} className="text-sm text-neutral-300 flex items-start space-x-2">
+                            <span className="text-red-400 mt-1">•</span>
+                            <span>{issue}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {aiAnalysis.analysis.suggestions.length > 0 && (
+                    <div className="mb-4">
+                      <h4 className="text-sm font-semibold text-blue-400 mb-2">Sugerencias:</h4>
+                      <ul className="space-y-1">
+                        {aiAnalysis.analysis.suggestions.map((suggestion, index) => (
+                          <li key={index} className="text-sm text-neutral-300 flex items-start space-x-2">
+                            <span className="text-blue-400 mt-1">•</span>
+                            <span>{suggestion}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {aiAnalysis.recommendations.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-semibold text-yellow-400 mb-2">Recomendaciones:</h4>
+                      <ul className="space-y-1">
+                        {aiAnalysis.recommendations.map((recommendation, index) => (
+                          <li key={index} className="text-sm text-neutral-300 flex items-start space-x-2">
+                            <span className="text-yellow-400 mt-1">•</span>
+                            <span>{recommendation}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Action Buttons */}
               <div className="flex flex-wrap gap-4 justify-center mb-8">
@@ -466,7 +600,7 @@ export default function ContractGeneratePage() {
         <div className="container mx-auto px-6 py-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
             <p className="text-xs sm:text-sm text-neutral-400">
-              © 2024 KONRAD Inmobiliaria. Todos los derechos reservados.
+              © 2013 Konrad Inversiones + Desarrollos Inmobiliarios. Todos los derechos reservados.
             </p>
             <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4">
               <p className="text-[10px] sm:text-xs text-neutral-500">
