@@ -6,7 +6,7 @@ import {
   FileText, 
   FileSpreadsheet, 
   FileJson, 
-  FilePdf,
+  File,
   X,
   CheckCircle,
   AlertCircle,
@@ -58,7 +58,7 @@ export default function ExportModal({
     { 
       value: 'pdf', 
       label: 'PDF', 
-      icon: FilePdf, 
+      icon: File, 
       description: 'Documento portable',
       color: 'text-red-400'
     }

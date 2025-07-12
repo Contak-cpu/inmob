@@ -278,4 +278,11 @@ export const clearAllData = () => {
     localStorage.removeItem(key);
   });
   return true;
+};
+
+// ===== GESTIÓN DE USUARIOS =====
+
+// Obtener todos los usuarios
+export const getAllUsers = () => {
+  return getFromStorage('konrad_users', []);
 }; 

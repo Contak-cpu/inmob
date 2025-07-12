@@ -41,66 +41,6 @@ export function usePerformance() {
     return React.lazy(importFunc);
   }, []);
 
-  // Virtualización para listas grandes
-  const virtualizeList = useCallback((items, itemHeight, containerHeight) => {
-    const [scrollTop, setScrollTop] = useState(0);
-    
-    const visibleItems = useMemo(() => {
-      const startIndex = Math.floor(scrollTop / itemHeight);
-      const endIndex = Math.min(
-        startIndex + Math.ceil(containerHeight / itemHeight) + 1,
-        items.length
-      );
-      
-      return items.slice(startIndex, endIndex).map((item, index) => ({
-        ...item,
-        index: startIndex + index,
-        style: {
-          position: 'absolute',
-          top: (startIndex + index) * itemHeight,
-          height: itemHeight,
-          width: '100%'
-        }
-      }));
-    }, [items, scrollTop, itemHeight, containerHeight]);
-
-    const handleScroll = useCallback((e) => {
-      setScrollTop(e.target.scrollTop);
-    }, []);
-
-    return {
-      visibleItems,
-      handleScroll,
-      totalHeight: items.length * itemHeight
-    };
-  }, []);
-
-  // Cache de datos
-  const useCache = useCallback((key, data, ttl = 5 * 60 * 1000) => {
-    const [cachedData, setCachedData] = useState(null);
-
-    useEffect(() => {
-      const cached = localStorage.getItem(`cache_${key}`);
-      if (cached) {
-        const { data: cachedData, timestamp } = JSON.parse(cached);
-        if (Date.now() - timestamp < ttl) {
-          setCachedData(cachedData);
-          return;
-        }
-      }
-      
-      if (data) {
-        setCachedData(data);
-        localStorage.setItem(`cache_${key}`, JSON.stringify({
-          data,
-          timestamp: Date.now()
-        }));
-      }
-    }, [key, data, ttl]);
-
-    return cachedData;
-  }, []);
-
   // Optimización de imágenes
   const optimizeImage = useCallback((src, options = {}) => {
     const {
@@ -138,6 +78,61 @@ export function usePerformance() {
       console.error('Error prefetching data:', error);
       return null;
     }
+  }, []);
+
+  // Optimización de re-renders
+  const useOptimizedCallback = useCallback((callback, dependencies) => {
+    return useCallback(callback, dependencies);
+  }, []);
+
+  const useOptimizedMemo = useCallback((factory, dependencies) => {
+    return useMemo(factory, dependencies);
+  }, []);
+
+  // Gestión de estado optimizada
+  const useOptimizedState = useCallback((initialState) => {
+    const [state, setState] = useState(initialState);
+    
+    const setOptimizedState = useCallback((newState) => {
+      if (typeof newState === 'function') {
+        setState(prevState => {
+          const nextState = newState(prevState);
+          return JSON.stringify(prevState) === JSON.stringify(nextState) ? prevState : nextState;
+        });
+      } else {
+        setState(prevState => 
+          JSON.stringify(prevState) === JSON.stringify(newState) ? prevState : newState
+        );
+      }
+    }, []);
+
+    return [state, setOptimizedState];
+  }, []);
+
+  // Cache de datos
+  const useCache = useCallback((key, data, ttl = 5 * 60 * 1000) => {
+    const [cachedData, setCachedData] = useState(null);
+
+    useEffect(() => {
+      const cached = localStorage.getItem(`cache_${key}`);
+      if (cached) {
+        const { data: cachedData, timestamp } = JSON.parse(cached);
+        if (Date.now() - timestamp < ttl) {
+          setCachedData(cachedData);
+          return;
+        }
+      }
+      
+      if (data) {
+        setCachedData(data);
+        localStorage.setItem(`cache_${key}`, JSON.stringify({
+          data,
+          timestamp: Date.now()
+        }));
+      }
+    }, [key, data, ttl]);
+
+    return cachedData;
   }, []);
 
   // Monitoreo de rendimiento
@@ -185,54 +180,65 @@ export function usePerformance() {
     return metrics;
   }, []);
 
-  // Optimización de re-renders
-  const useOptimizedCallback = useCallback((callback, dependencies) => {
-    return useCallback(callback, dependencies);
-  }, []);
-
-  const useOptimizedMemo = useCallback((factory, dependencies) => {
-    return useMemo(factory, dependencies);
-  }, []);
-
-  // Gestión de estado optimizada
-  const useOptimizedState = useCallback((initialState) => {
-    const [state, setState] = useState(initialState);
-    
-    const setOptimizedState = useCallback((newState) => {
-      setState(prevState => {
-        if (typeof newState === 'function') {
-          const result = newState(prevState);
-          return result === prevState ? prevState : result;
-        }
-        return newState === prevState ? prevState : newState;
-      });
-    }, []);
-
-    return [state, setOptimizedState];
-  }, []);
-
   return {
-    // Estados
+    // Estado
     isLoading,
     setIsLoading,
     error,
     setError,
     lastUpdate,
     setLastUpdate,
-
-    // Utilidades de optimización
+    
+    // Funciones de optimización
     debounce,
     throttle,
     memoizeData,
     lazyLoad,
-    virtualizeList,
-    useCache,
     optimizeImage,
     prefetchData,
-    usePerformanceMonitor,
+    
+    // Hooks optimizados
     useOptimizedCallback,
     useOptimizedMemo,
-    useOptimizedState
+    useOptimizedState,
+    useCache,
+    usePerformanceMonitor,
+  };
+}
+
+/**
+ * Hook para virtualización de listas
+ */
+export function useVirtualization(items, itemHeight, containerHeight) {
+  const [scrollTop, setScrollTop] = useState(0);
+  
+  const visibleItems = useMemo(() => {
+    const startIndex = Math.floor(scrollTop / itemHeight);
+    const endIndex = Math.min(
+      startIndex + Math.ceil(containerHeight / itemHeight) + 1,
+      items.length
+    );
+    
+    return items.slice(startIndex, endIndex).map((item, index) => ({
+      ...item,
+      index: startIndex + index,
+      style: {
+        position: 'absolute',
+        top: (startIndex + index) * itemHeight,
+        height: itemHeight,
+        width: '100%'
+      }
+    }));
+  }, [items, scrollTop, itemHeight, containerHeight]);
+
+  const handleScroll = useCallback((e) => {
+    setScrollTop(e.target.scrollTop);
+  }, []);
+
+  return {
+    visibleItems,
+    handleScroll,
+    totalHeight: items.length * itemHeight
   };
 }
 
@@ -241,34 +247,28 @@ export function usePerformance() {
  */
 export function useLazyImage(src, placeholder = '/placeholder.png') {
   const [imageSrc, setImageSrc] = useState(placeholder);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [error, setError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     if (!src) return;
 
+    setIsLoading(true);
+    setError(null);
+
     const img = new Image();
-    
     img.onload = () => {
       setImageSrc(src);
-      setIsLoaded(true);
-      setError(false);
+      setIsLoading(false);
     };
-    
     img.onerror = () => {
-      setError(true);
-      setIsLoaded(false);
+      setError('Error loading image');
+      setIsLoading(false);
     };
-    
     img.src = src;
   }, [src]);
 
-  return {
-    src: imageSrc,
-    isLoaded,
-    error,
-    isLoading: !isLoaded && !error
-  };
+  return { imageSrc, isLoading, error };
 }
 
 /**
@@ -277,82 +277,71 @@ export function useLazyImage(src, placeholder = '/placeholder.png') {
 export function useInfiniteScroll(callback, options = {}) {
   const {
     threshold = 100,
-    root = null,
-    rootMargin = '0px'
+    rootMargin = '0px',
+    enabled = true
   } = options;
 
-  const [isIntersecting, setIsIntersecting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
 
   const observerRef = useCallback((node) => {
-    if (node) {
-      const observer = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) {
-            setIsIntersecting(true);
-            callback();
-          } else {
-            setIsIntersecting(false);
+    if (!node || !enabled) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && hasMore && !isLoading) {
+            setIsLoading(true);
+            callback().finally(() => setIsLoading(false));
           }
-        },
-        {
-          threshold,
-          root,
-          rootMargin
-        }
-      );
+        });
+      },
+      {
+        rootMargin,
+        threshold
+      }
+    );
 
-      observer.observe(node);
+    observer.observe(node);
 
-      return () => observer.disconnect();
-    }
-  }, [callback, threshold, root, rootMargin]);
+    return () => observer.disconnect();
+  }, [callback, hasMore, isLoading, enabled, rootMargin, threshold]);
 
   return {
     observerRef,
-    isIntersecting
+    isLoading,
+    hasMore,
+    setHasMore
   };
 }
 
 /**
- * Hook para optimización de formularios
+ * Hook para formularios optimizados
  */
 export function useOptimizedForm(initialData = {}) {
   const [formData, setFormData] = useState(initialData);
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleChange = useCallback((e) => {
-    const { name, value, type, checked } = e.target;
-    const fieldValue = type === 'checkbox' ? checked : value;
-
-    setFormData(prev => ({
-      ...prev,
-      [name]: fieldValue
-    }));
-
+  const updateField = useCallback((field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
     // Limpiar error del campo si existe
-    if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }));
+    if (errors[field]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
     }
   }, [errors]);
 
-  const handleSubmit = useCallback(async (onSubmit) => {
-    setIsSubmitting(true);
-    setErrors({});
+  const setFieldError = useCallback((field, error) => {
+    setErrors(prev => ({ ...prev, [field]: error }));
+  }, []);
 
-    try {
-      await onSubmit(formData);
-    } catch (error) {
-      if (error.errors) {
-        setErrors(error.errors);
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
-  }, [formData]);
+  const clearErrors = useCallback(() => {
+    setErrors({});
+  }, []);
 
   const resetForm = useCallback(() => {
     setFormData(initialData);
@@ -360,14 +349,25 @@ export function useOptimizedForm(initialData = {}) {
     setIsSubmitting(false);
   }, [initialData]);
 
+  const handleSubmit = useCallback(async (submitFunction) => {
+    setIsSubmitting(true);
+    try {
+      await submitFunction(formData);
+    } catch (error) {
+      console.error('Form submission error:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [formData]);
+
   return {
     formData,
     errors,
     isSubmitting,
-    handleChange,
-    handleSubmit,
+    updateField,
+    setFieldError,
+    clearErrors,
     resetForm,
-    setFormData,
-    setErrors
+    handleSubmit
   };
 } 

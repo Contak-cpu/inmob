@@ -300,9 +300,11 @@ describe('Casos Edge', () => {
   });
 });
 
-export default {
+const testRunner = {
   runAllTests: async () => {
     console.log('🧪 Ejecutando todos los tests...\n');
     return await runTests();
   }
-}; 
+};
+
+export default testRunner; 
