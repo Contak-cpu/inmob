@@ -1,5 +1,7 @@
 import { CONTRACT_TYPES, COMPANY_CONFIG } from '@/lib/config';
 import { formatCurrency, formatDate } from '@/utils/formatters';
+import { saveContract } from '@/utils/database';
+import { notifyContractCreated, createContractExpiryReminder } from '@/utils/notifications';
 
 // Función para generar el contrato según el tipo
 export const generateContract = (contractData, contractType) => {
@@ -26,6 +28,44 @@ export const generateContract = (contractData, contractType) => {
   }
 
   return template;
+};
+
+// Función para generar y guardar contrato
+export const generateAndSaveContract = async (contractData, contractType) => {
+  try {
+    // Generar el contrato
+    const contractText = generateContract(contractData, contractType);
+    
+    // Preparar datos para guardar
+    const contractToSave = {
+      ...contractData,
+      contractType,
+      contractText,
+      status: 'active',
+    };
+    
+    // Guardar en la base de datos
+    const savedContract = saveContract(contractToSave);
+    
+    // Crear notificación
+    notifyContractCreated(savedContract);
+    
+    // Crear recordatorio de vencimiento
+    createContractExpiryReminder(savedContract);
+    
+    return {
+      success: true,
+      contract: savedContract,
+      message: 'Contrato generado y guardado exitosamente'
+    };
+  } catch (error) {
+    console.error('Error al generar y guardar contrato:', error);
+    return {
+      success: false,
+      error: error.message,
+      message: 'Error al generar el contrato'
+    };
+  }
 };
 
 // Plantilla para Contrato Comercial

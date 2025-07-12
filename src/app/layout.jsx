@@ -1,6 +1,8 @@
 import React from 'react';
 import { Inter } from 'next/font/google';
 import './globals.css';
+import { initializeNotifications } from '@/utils/notifications';
+import { initializeAuth } from '@/utils/auth';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -20,6 +22,14 @@ export const viewport = {
 };
 
 export default function RootLayout({ children }) {
+  // Inicializar sistemas en el cliente
+  if (typeof window !== 'undefined') {
+    React.useEffect(() => {
+      initializeNotifications();
+      initializeAuth();
+    }, []);
+  }
+
   return (
     <html lang="es" className="h-full">
       <head>

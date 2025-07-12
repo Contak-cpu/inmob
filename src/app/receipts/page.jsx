@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Home, Building, Wrench, Settings, FileText } from 'lucide-react';
 import { RECEIPT_TYPES } from '@/lib/config';
 import PictoNSignature from '@/components/PictoNSignature';
+import { ReceiptRoute } from '@/components/ProtectedRoute';
 
 const receiptTypeIcons = {
   alquiler: { icon: <Home className="h-8 w-8" />, color: 'primary', bg: 'bg-primary-500/20', border: 'border-primary-500/30', text: 'text-primary-400' },
@@ -16,7 +17,8 @@ const receiptTypeIcons = {
 
 export default function ReceiptsPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-neutral-900 via-neutral-800 to-neutral-900">
+    <ReceiptRoute>
+      <div className="min-h-screen bg-gradient-to-br from-neutral-900 via-neutral-800 to-neutral-900">
       {/* Header */}
       <header className="glass-effect border-b border-neutral-700/50">
         <div className="container mx-auto px-6 py-4">
@@ -115,6 +117,7 @@ export default function ReceiptsPage() {
           </div>
         </div>
       </footer>
-    </div>
+      </div>
+    </ReceiptRoute>
   );
 } 

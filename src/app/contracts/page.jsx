@@ -6,10 +6,12 @@ import { ArrowLeft, FileText } from 'lucide-react';
 import { CONTRACT_TYPES } from '@/lib/config';
 import ContractTypeCard from '@/components/ContractTypeCard';
 import PictoNSignature from '@/components/PictoNSignature';
+import { ContractRoute } from '@/components/ProtectedRoute';
 
 export default function ContractsPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-neutral-900 via-neutral-800 to-neutral-900">
+    <ContractRoute>
+      <div className="min-h-screen bg-gradient-to-br from-neutral-900 via-neutral-800 to-neutral-900">
       {/* Header */}
       <header className="glass-effect border-b border-neutral-700/50">
         <div className="container mx-auto px-6 py-4">
@@ -99,6 +101,7 @@ export default function ContractsPage() {
           </div>
         </div>
       </footer>
-    </div>
+      </div>
+    </ContractRoute>
   );
 } 
