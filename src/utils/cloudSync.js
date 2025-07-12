@@ -31,7 +31,7 @@ export const SYNC_DATA_TYPES = {
 };
 
 // Estado de sincronización
-let syncState = {
+const syncState = {
   status: SYNC_STATUS.IDLE,
   lastSync: null,
   pendingChanges: [],

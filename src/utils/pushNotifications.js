@@ -20,7 +20,7 @@ const PUSH_CONFIG = {
 
 // Estado de notificaciones push
 let pushPermission = false;
-let pushSubscription = null;
+const pushSubscription = null;
 
 // ===== GESTIÓN DE PERMISOS =====
 

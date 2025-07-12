@@ -85,6 +85,7 @@ export default function HistoryPanel() {
   };
 
   const handleClearHistory = () => {
+    // eslint-disable-next-line no-alert
     if (confirm('¿Estás seguro de que quieres limpiar todo el historial? Esta acción no se puede deshacer.')) {
       localStorage.removeItem('konrad_history');
       localStorage.removeItem('konrad_contracts');

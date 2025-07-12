@@ -32,7 +32,7 @@ export const UPDATE_STATUS = {
 };
 
 // Estado de APIs externas
-let apiState = {
+const apiState = {
   status: UPDATE_STATUS.IDLE,
   lastUpdate: null,
   cachedData: {},

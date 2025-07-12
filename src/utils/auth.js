@@ -398,6 +398,7 @@ export const initializeAuth = () => {
   // Configurar listener para sesión expirada
   if (typeof window !== 'undefined') {
     window.addEventListener('sessionExpired', () => {
+      // eslint-disable-next-line no-alert
       alert('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
     });
   }
