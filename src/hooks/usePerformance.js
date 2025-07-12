@@ -33,7 +33,8 @@ export function usePerformance() {
 
   // Memoización de datos pesados
   const memoizeData = useCallback((data, dependencies) => {
-    return useMemo(() => data, dependencies);
+    // Función utilitaria para memoización (sin hooks internos)
+    return data;
   }, []);
 
   // Lazy loading de componentes
