@@ -1,31 +1,42 @@
 // Sistema de notificaciones para Konrad Inmobiliaria
 
-// Tipos de notificaciones
+// Tipos de notificación
 export const NOTIFICATION_TYPES = {
   SUCCESS: 'success',
   ERROR: 'error',
   WARNING: 'warning',
   INFO: 'info',
-  REMINDER: 'reminder',
 };
 
-// Configuración de notificaciones
-const NOTIFICATION_CONFIG = {
-  maxNotifications: 10,
-  autoHideDelay: 5000, // 5 segundos
-  position: 'top-right',
+// Sistema de logging silencioso en producción
+const logError = (message, error) => {
+  if (process.env.NODE_ENV !== 'production') {
+    console.error(message, error);
+  }
 };
 
-// Almacenamiento de notificaciones
-let notifications = [];
-let notificationId = 0;
+// Claves para localStorage
+const NOTIFICATION_KEYS = {
+  NOTIFICATIONS: 'konrad_notifications',
+  SETTINGS: 'konrad_notification_settings',
+};
+
+// Configuración por defecto
+const DEFAULT_SETTINGS = {
+  enabled: true,
+  sound: true,
+  desktop: true,
+  email: false,
+  autoHide: true,
+  duration: 5000,
+};
 
 // ===== GESTIÓN DE NOTIFICACIONES =====
 
 // Crear notificación
 export const createNotification = (type, title, message, options = {}) => {
   const notification = {
-    id: ++notificationId,
+    id: generateId(),
     type,
     title,
     message,
@@ -34,62 +45,79 @@ export const createNotification = (type, title, message, options = {}) => {
     ...options,
   };
 
-  notifications.unshift(notification);
+  // Guardar notificación
+  saveNotification(notification);
 
-  // Limitar cantidad de notificaciones
-  if (notifications.length > NOTIFICATION_CONFIG.maxNotifications) {
-    notifications = notifications.slice(0, NOTIFICATION_CONFIG.maxNotifications);
+  // Mostrar toast si está habilitado
+  if (typeof window !== 'undefined' && window.showToast) {
+    window.showToast(notification);
   }
-
-  // Guardar en localStorage
-  saveNotifications();
-
-  // Mostrar notificación visual
-  showVisualNotification(notification);
 
   return notification;
 };
 
-// Obtener todas las notificaciones
-export const getNotifications = () => {
-  return [...notifications];
-};
-
-// Marcar como leída
-export const markAsRead = (id) => {
-  const notification = notifications.find(n => n.id === id);
-  if (notification) {
-    notification.read = true;
-    saveNotifications();
+// Guardar notificación
+const saveNotification = (notification) => {
+  try {
+    const notifications = getNotifications();
+    notifications.unshift(notification);
+    
+    // Mantener solo las últimas 100 notificaciones
+    if (notifications.length > 100) {
+      notifications.splice(100);
+    }
+    
+    localStorage.setItem(NOTIFICATION_KEYS.NOTIFICATIONS, JSON.stringify(notifications));
+  } catch (error) {
+    logError('Error al guardar notificación:', error);
   }
 };
 
-// Marcar todas como leídas
-export const markAllAsRead = () => {
-  notifications.forEach(n => n.read = true);
-  saveNotifications();
+// Obtener notificaciones
+export const getNotifications = (limit = 50) => {
+  try {
+    const data = localStorage.getItem(NOTIFICATION_KEYS.NOTIFICATIONS);
+    const notifications = data ? JSON.parse(data) : [];
+    return limit ? notifications.slice(0, limit) : notifications;
+  } catch (error) {
+    logError('Error al cargar notificaciones:', error);
+    return [];
+  }
+};
+
+// Marcar notificación como leída
+export const markNotificationAsRead = (id) => {
+  try {
+    const notifications = getNotifications();
+    const index = notifications.findIndex(n => n.id === id);
+    
+    if (index !== -1) {
+      notifications[index].read = true;
+      localStorage.setItem(NOTIFICATION_KEYS.NOTIFICATIONS, JSON.stringify(notifications));
+    }
+  } catch (error) {
+    logError('Error al marcar notificación como leída:', error);
+  }
 };
 
 // Eliminar notificación
 export const deleteNotification = (id) => {
-  notifications = notifications.filter(n => n.id !== id);
-  saveNotifications();
+  try {
+    const notifications = getNotifications();
+    const filtered = notifications.filter(n => n.id !== id);
+    localStorage.setItem(NOTIFICATION_KEYS.NOTIFICATIONS, JSON.stringify(filtered));
+  } catch (error) {
+    logError('Error al eliminar notificación:', error);
+  }
 };
 
 // Limpiar todas las notificaciones
-export const clearNotifications = () => {
-  notifications = [];
-  saveNotifications();
-};
-
-// Obtener notificaciones no leídas
-export const getUnreadNotifications = () => {
-  return notifications.filter(n => !n.read);
-};
-
-// Contar notificaciones no leídas
-export const getUnreadCount = () => {
-  return notifications.filter(n => !n.read).length;
+export const clearAllNotifications = () => {
+  try {
+    localStorage.removeItem(NOTIFICATION_KEYS.NOTIFICATIONS);
+  } catch (error) {
+    logError('Error al limpiar notificaciones:', error);
+  }
 };
 
 // ===== NOTIFICACIONES ESPECÍFICAS =====
@@ -98,11 +126,11 @@ export const getUnreadCount = () => {
 export const notifyContractCreated = (contractData) => {
   return createNotification(
     NOTIFICATION_TYPES.SUCCESS,
-    'Contrato Creado',
-    `Se ha generado el contrato ${contractData.contractType} para ${contractData.tenantName}`,
+    'Contrato Generado',
+    `Contrato de ${contractData.contractType} generado exitosamente para ${contractData.tenantName}`,
     {
-      action: 'view_contract',
-      data: contractData,
+      action: 'view',
+      data: { type: 'contract', id: contractData.id }
     }
   );
 };
@@ -111,11 +139,11 @@ export const notifyContractCreated = (contractData) => {
 export const notifyReceiptCreated = (receiptData) => {
   return createNotification(
     NOTIFICATION_TYPES.SUCCESS,
-    'Recibo Creado',
-    `Se ha generado el recibo ${receiptData.receiptType} por $${receiptData.totalAmount}`,
+    'Recibo Generado',
+    `Recibo de ${receiptData.receiptType} generado exitosamente para ${receiptData.tenantName || receiptData.clientName}`,
     {
-      action: 'view_receipt',
-      data: receiptData,
+      action: 'view',
+      data: { type: 'receipt', id: receiptData.id }
     }
   );
 };
@@ -125,8 +153,16 @@ export const notifyError = (title, message) => {
   return createNotification(
     NOTIFICATION_TYPES.ERROR,
     title,
-    message,
-    { autoHide: false }
+    message
+  );
+};
+
+// Notificación de éxito
+export const notifySuccess = (title, message) => {
+  return createNotification(
+    NOTIFICATION_TYPES.SUCCESS,
+    title,
+    message
   );
 };
 
@@ -148,13 +184,33 @@ export const notifyInfo = (title, message) => {
   );
 };
 
-// Notificación de éxito
-export const notifySuccess = (title, message) => {
-  return createNotification(
-    NOTIFICATION_TYPES.SUCCESS,
-    title,
-    message
-  );
+// ===== CONFIGURACIÓN =====
+
+// Obtener configuración
+export const getNotificationSettings = () => {
+  try {
+    const data = localStorage.getItem(NOTIFICATION_KEYS.SETTINGS);
+    return data ? { ...DEFAULT_SETTINGS, ...JSON.parse(data) } : DEFAULT_SETTINGS;
+  } catch (error) {
+    logError('Error al cargar configuración de notificaciones:', error);
+    return DEFAULT_SETTINGS;
+  }
+};
+
+// Guardar configuración
+export const saveNotificationSettings = (settings) => {
+  try {
+    localStorage.setItem(NOTIFICATION_KEYS.SETTINGS, JSON.stringify(settings));
+  } catch (error) {
+    logError('Error al guardar configuración de notificaciones:', error);
+  }
+};
+
+// ===== UTILIDADES =====
+
+// Generar ID único
+const generateId = () => {
+  return Date.now().toString(36) + Math.random().toString(36).substr(2);
 };
 
 // ===== RECORDATORIOS =====

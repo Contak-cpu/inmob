@@ -269,7 +269,7 @@ export default function ContractForm({
               type="date"
               value={localFormData.startDate || ''}
               onChange={(e) => handleInputChange('startDate', e.target.value)}
-              className={`input-field ${errors.startDate ? 'border-error-500' : ''}`}
+              className={`input-field ${errors.startDate ? 'border-error-500' : ''} date-light`}
             />
             {errors.startDate && (
               <p className="text-error-400 text-sm mt-1">{errors.startDate}</p>
@@ -350,9 +350,19 @@ export default function ContractForm({
               <p className="text-error-400 text-sm mt-1">{errors.adjustmentType}</p>
             )}
             {contract?.adjustmentType && !localFormData.adjustmentType && (
-              <p className="text-primary-400 text-sm mt-1">
-                Sugerencia: {ADJUSTMENT_TYPES[contract.adjustmentType]?.name} - {ADJUSTMENT_TYPES[contract.adjustmentType]?.description}
-              </p>
+              <div className="mt-2 p-3 bg-primary-400/10 border border-primary-400/20 rounded-lg">
+                <div className="flex items-start space-x-2">
+                  <div className="text-primary-400 mt-0.5">💡</div>
+                  <div>
+                    <p className="text-primary-400 text-sm font-medium mb-1">
+                      Sugerencia para este tipo de contrato:
+                    </p>
+                    <p className="text-neutral-300 text-sm">
+                      <span className="font-medium">{ADJUSTMENT_TYPES[contract.adjustmentType]?.name}</span> - {ADJUSTMENT_TYPES[contract.adjustmentType]?.description}
+                    </p>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
         </div>

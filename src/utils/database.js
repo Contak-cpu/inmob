@@ -8,13 +8,20 @@ const STORAGE_KEYS = {
   HISTORY: 'konrad_history',
 };
 
+// Sistema de logging silencioso en producción
+const logError = (message, error) => {
+  if (process.env.NODE_ENV !== 'production') {
+    console.error(message, error);
+  }
+};
+
 // Función para obtener datos del localStorage
 const getFromStorage = (key, defaultValue = []) => {
   try {
     const data = localStorage.getItem(key);
     return data ? JSON.parse(data) : defaultValue;
   } catch (error) {
-    console.error(`Error al leer de localStorage (${key}):`, error);
+    logError(`Error al leer de localStorage (${key}):`, error);
     return defaultValue;
   }
 };
@@ -25,7 +32,7 @@ const saveToStorage = (key, data) => {
     localStorage.setItem(key, JSON.stringify(data));
     return true;
   } catch (error) {
-    console.error(`Error al guardar en localStorage (${key}):`, error);
+    logError(`Error al guardar en localStorage (${key}):`, error);
     return false;
   }
 };

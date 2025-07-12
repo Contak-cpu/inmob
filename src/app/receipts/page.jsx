@@ -6,6 +6,7 @@ import { Home, Building, Wrench, Settings, FileText } from 'lucide-react';
 import { RECEIPT_TYPES } from '@/lib/config';
 import PictoNSignature from '@/components/PictoNSignature';
 import { ReceiptRoute } from '@/components/ProtectedRoute';
+import Breadcrumbs from '@/components/Breadcrumbs';
 
 const receiptTypeIcons = {
   alquiler: { icon: <Home className="h-8 w-8" />, color: 'primary', bg: 'bg-primary-500/20', border: 'border-primary-500/30', text: 'text-primary-400' },
@@ -37,6 +38,13 @@ export default function ReceiptsPage() {
       {/* Main Content */}
       <main className="container mx-auto px-6 py-12">
         <div className="max-w-5xl mx-auto">
+          {/* Breadcrumbs */}
+          <Breadcrumbs 
+            items={[
+              { label: 'Recibos', href: '/receipts' }
+            ]} 
+          />
+          
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-white mb-4">
               Tipos de <span className="text-gradient-primary">Recibos</span>

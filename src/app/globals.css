@@ -62,6 +62,39 @@
   .text-gradient-secondary {
     @apply bg-gradient-to-r from-secondary-400 to-secondary-600 bg-clip-text text-transparent;
   }
+
+  .date-light::-webkit-calendar-picker-indicator {
+    filter: invert(1) brightness(2);
+  }
+  .date-light[type="date"]::-webkit-input-placeholder {
+    color: #fff;
+  }
+  .date-light[type="date"]::-webkit-datetime-edit {
+    color: #fff;
+  }
+  .date-light[type="date"]::-webkit-datetime-edit-fields-wrapper {
+    color: #fff;
+  }
+  .date-light[type="date"]::-webkit-datetime-edit-text {
+    color: #fff;
+  }
+  .date-light[type="date"]::-webkit-datetime-edit-month-field {
+    color: #fff;
+  }
+  .date-light[type="date"]::-webkit-datetime-edit-day-field {
+    color: #fff;
+  }
+  .date-light[type="date"]::-webkit-datetime-edit-year-field {
+    color: #fff;
+  }
+  .date-light[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1) brightness(2);
+  }
+  .date-light[type="date"] {
+    background-color: #222 !important;
+    color: #fff !important;
+    border-radius: 0.75rem;
+  }
 }
 
 @layer utilities {

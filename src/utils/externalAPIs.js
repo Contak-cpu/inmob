@@ -1,5 +1,18 @@
 // Estructura para integración con APIs externas - Preparado para integración futura
 
+// Sistema de logging silencioso en producción
+const logInfo = (message) => {
+  if (process.env.NODE_ENV !== 'production') {
+    console.log(message);
+  }
+};
+
+const logError = (message, error) => {
+  if (process.env.NODE_ENV !== 'production') {
+    console.error(message, error);
+  }
+};
+
 // Configuración de APIs externas
 export const API_CONFIG = {
   enabled: false, // Cambiar a true cuando se implemente la integración
@@ -53,7 +66,7 @@ const saveToCache = (key, data) => {
     localStorage.setItem(`konrad_api_cache_${key}`, JSON.stringify(cacheData));
     apiState.cachedData[key] = cacheData;
   } catch (error) {
-    console.error('Error al guardar en cache:', error);
+    logError('Error al guardar en cache:', error);
   }
 };
 
@@ -76,7 +89,7 @@ const getFromCache = (key) => {
       }
     }
   } catch (error) {
-    console.error('Error al leer cache:', error);
+    logError('Error al leer cache:', error);
   }
   
   return null;
@@ -93,7 +106,7 @@ const isCacheExpired = (key) => {
 // Obtener índice IPC
 export const fetchIPC = async (date = null) => {
   if (!API_CONFIG.enabled) {
-    console.log('APIs externas deshabilitadas');
+    logInfo('APIs externas deshabilitadas');
     return null;
   }
   
@@ -109,7 +122,7 @@ export const fetchIPC = async (date = null) => {
   
   try {
     // Aquí iría la llamada real a la API
-    console.log('Obteniendo índice IPC...');
+    logInfo('Obteniendo índice IPC...');
     
     // Simular llamada a API
     await new Promise(resolve => setTimeout(resolve, 2000));
@@ -140,7 +153,7 @@ export const fetchIPC = async (date = null) => {
       timestamp: new Date().toISOString(),
     });
     
-    console.error('Error obteniendo IPC:', error);
+    logError('Error obteniendo IPC:', error);
     return null;
   }
 };
@@ -148,7 +161,7 @@ export const fetchIPC = async (date = null) => {
 // Obtener índice ICL
 export const fetchICL = async (date = null) => {
   if (!API_CONFIG.enabled) {
-    console.log('APIs externas deshabilitadas');
+    logInfo('APIs externas deshabilitadas');
     return null;
   }
   
@@ -164,7 +177,7 @@ export const fetchICL = async (date = null) => {
   
   try {
     // Aquí iría la llamada real a la API
-    console.log('Obteniendo índice ICL...');
+    logInfo('Obteniendo índice ICL...');
     
     // Simular llamada a API
     await new Promise(resolve => setTimeout(resolve, 2000));
@@ -196,7 +209,7 @@ export const fetchICL = async (date = null) => {
       timestamp: new Date().toISOString(),
     });
     
-    console.error('Error obteniendo ICL:', error);
+    logError('Error obteniendo ICL:', error);
     return null;
   }
 };
@@ -204,7 +217,7 @@ export const fetchICL = async (date = null) => {
 // Obtener índice UVA
 export const fetchUVA = async (date = null) => {
   if (!API_CONFIG.enabled) {
-    console.log('APIs externas deshabilitadas');
+    logInfo('APIs externas deshabilitadas');
     return null;
   }
   
@@ -220,7 +233,7 @@ export const fetchUVA = async (date = null) => {
   
   try {
     // Aquí iría la llamada real a la API
-    console.log('Obteniendo índice UVA...');
+    logInfo('Obteniendo índice UVA...');
     
     // Simular llamada a API
     await new Promise(resolve => setTimeout(resolve, 2000));
@@ -251,7 +264,7 @@ export const fetchUVA = async (date = null) => {
       timestamp: new Date().toISOString(),
     });
     
-    console.error('Error obteniendo UVA:', error);
+    logError('Error obteniendo UVA:', error);
     return null;
   }
 };
@@ -335,7 +348,7 @@ export const updateAllIndices = async () => {
     return { success: false, message: 'APIs externas deshabilitadas' };
   }
   
-  console.log('Actualizando índices externos...');
+      logInfo('Actualizando índices externos...');
   
   const results = {
     ipc: await fetchIPC(),
@@ -368,7 +381,7 @@ export const setupAutoUpdate = () => {
     const indices = [INDEX_TYPES.IPC, INDEX_TYPES.ICL, INDEX_TYPES.UVA];
     indices.forEach(index => {
       if (isCacheExpired(index)) {
-        console.log(`Cache expirado para ${index} - Actualizando...`);
+        logInfo(`Cache expirado para ${index} - Actualizando...`);
         switch (index) {
           case INDEX_TYPES.IPC:
             fetchIPC();
@@ -399,9 +412,9 @@ export const clearCache = () => {
       localStorage.removeItem(`konrad_api_cache_${key}`);
     });
     apiState.cachedData = {};
-    console.log('Cache de APIs limpiado');
+    logInfo('Cache de APIs limpiado');
   } catch (error) {
-    console.error('Error al limpiar cache:', error);
+          logError('Error al limpiar cache:', error);
   }
 };
 
@@ -420,7 +433,7 @@ export const clearAPIErrors = () => {
 // Inicializar sistema de APIs externas
 export const initializeExternalAPIs = () => {
   if (!API_CONFIG.enabled) {
-    console.log('APIs externas deshabilitadas');
+    logInfo('APIs externas deshabilitadas');
     return;
   }
   

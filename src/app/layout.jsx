@@ -2,6 +2,7 @@ import React from 'react';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import ClientInitializer from '@/components/ClientInitializer';
+import { ToastContainer } from '@/components/Toast';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -35,6 +36,7 @@ export default function RootLayout({ children }) {
         <div className="min-h-screen bg-gradient-to-br from-neutral-900 via-neutral-800 to-neutral-900">
           <ClientInitializer />
           {children}
+          <ToastContainer />
         </div>
       </body>
     </html>

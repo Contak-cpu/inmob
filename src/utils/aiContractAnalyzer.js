@@ -186,7 +186,7 @@ export class AIContractAnalyzer {
       return {
         analysis,
         recommendations,
-        confidence: analysis.score / 100,
+        confidence: Math.min(Math.max(analysis.score / 100, 0), 1), // Asegurar rango 0-1
         status: analysis.score >= 80 ? 'APPROVED' : 'NEEDS_REVISION'
       };
     } catch (error) {

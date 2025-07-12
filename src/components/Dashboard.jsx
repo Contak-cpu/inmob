@@ -14,6 +14,27 @@ import {
 import { getSyncState } from '@/utils/cloudSync';
 import { getAPIState } from '@/utils/externalAPIs';
 
+function getMockDashboardData(period) {
+  // Simula datos para el dashboard
+  return {
+    report: {
+      financial: {
+        receipts: { totalAmount: 12500000 },
+        cashFlow: { efficiency: 92.5 },
+      },
+      contracts: { active: 18 },
+      receipts: { paid: 42 },
+    },
+    kpis: {
+      activeContracts: 18,
+      occupancyRate: 97.2,
+      paidReceipts: 42,
+      collectionRate: 98.5,
+      averageContractValue: 695000,
+    },
+  };
+}
+
 export default function Dashboard() {
   const [report, setReport] = useState(null);
   const [kpis, setKpis] = useState({});
@@ -22,6 +43,7 @@ export default function Dashboard() {
   const [pushEnabled, setPushEnabled] = useState(false);
   const [syncState, setSyncState] = useState({});
   const [apiState, setApiState] = useState({});
+  const [mocked, setMocked] = useState(false);
 
   useEffect(() => {
     loadDashboardData();
@@ -39,9 +61,20 @@ export default function Dashboard() {
   const loadDashboardData = async () => {
     setLoading(true);
     try {
-      const fullReport = generateFullReport(period);
-      const kpiData = calculateKPIs();
-      
+      let fullReport = generateFullReport(period);
+      let kpiData = calculateKPIs();
+      let isEmpty =
+        !fullReport ||
+        !kpiData ||
+        Object.values(kpiData).every((v) => !v || v === 0);
+      if (isEmpty) {
+        const mock = getMockDashboardData(period);
+        fullReport = mock.report;
+        kpiData = mock.kpis;
+        setMocked(true);
+      } else {
+        setMocked(false);
+      }
       setReport(fullReport);
       setKpis(kpiData);
     } catch (error) {
@@ -102,7 +135,12 @@ export default function Dashboard() {
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Dashboard Konrad</h1>
+            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+              Dashboard Konrad
+              {mocked && (
+                <span className="ml-2 px-2 py-1 rounded bg-yellow-100 text-yellow-800 text-xs font-semibold animate-pulse">Datos simulados</span>
+              )}
+            </h1>
             <p className="text-gray-600">Análisis y reportes en tiempo real</p>
           </div>
           

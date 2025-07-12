@@ -59,7 +59,10 @@ export const generateAndSaveContract = async (contractData, contractType) => {
       message: 'Contrato generado y guardado exitosamente'
     };
   } catch (error) {
-    console.error('Error al generar y guardar contrato:', error);
+    // Error silencioso en producción
+    if (process.env.NODE_ENV !== 'production') {
+      console.error('Error al generar y guardar contrato:', error);
+    }
     return {
       success: false,
       error: error.message,

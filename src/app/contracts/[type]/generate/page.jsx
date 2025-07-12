@@ -6,8 +6,11 @@ import { ArrowLeft, Download, Printer, Share2, FileText, CheckCircle, AlertCircl
 import { CONTRACT_TYPES, ADJUSTMENT_TYPES } from '@/lib/config';
 import { formatCurrency, formatDate } from '@/utils/formatters';
 import { generateContract, downloadContract } from '@/utils/contractGenerator';
+import { saveContract } from '@/utils/database';
 import { aiAnalyzer } from '@/utils/aiContractAnalyzer';
+import { notifySuccess, notifyError } from '@/utils/notifications';
 import PictoNSignature from '@/components/PictoNSignature';
+import Breadcrumbs from '@/components/Breadcrumbs';
 
 export default function ContractGeneratePage() {
   const params = useParams();
@@ -85,13 +88,29 @@ export default function ContractGeneratePage() {
       // Generar contrato
       const contractText = generateContract(contractData, contractType);
       
+      // Guardar contrato en el historial
+      const contractToSave = {
+        ...contractData,
+        contractType,
+        contractText,
+        status: 'active',
+        generatedAt: new Date().toISOString(),
+      };
+      
+      // Guardar usando la función de la base de datos
+      const savedContract = saveContract(contractToSave);
+      
       // Analizar con IA
       const analysis = await aiAnalyzer.compareWithRealTemplate(contractText, contractType);
       setAiAnalysis(analysis);
       
       setIsGenerated(true);
+      
+      // Mostrar notificación de éxito
+      notifySuccess('Contrato Generado', 'Contrato generado y guardado en el historial exitosamente');
     } catch (error) {
-      // Error handling
+      console.error('Error al generar contrato:', error);
+      notifyError('Error al Generar', 'Error al generar el contrato');
     } finally {
       setIsGenerating(false);
       setIsAnalyzing(false);
@@ -101,21 +120,206 @@ export default function ContractGeneratePage() {
   const handleDownload = () => {
     try {
       const contractText = generateContract(contractData, contractType);
-      const fileName = `Contrato_${contract.name.replace(/\s+/g, '_')}_${formatDate(new Date()).replace(/\//g, '-')}.txt`;
-      downloadContract(contractText, fileName);
-    } catch (error) {
-      // Error handling
-    }
+      const fileName = `Contrato_${contract.name.replace(/\s+/g, '_')}_${formatDate(new Date()).replace(/\//g, '-')}.pdf`;
+      
+      // Crear contenido HTML para PDF
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <title>Contrato - ${contract.name}</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
+            .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }
+            .section { margin-bottom: 20px; }
+            .signature-section { margin-top: 40px; border-top: 1px solid #ccc; padding-top: 20px; }
+            .signature-line { border-bottom: 1px solid #000; display: inline-block; width: 200px; margin: 0 20px; }
+            .company-info { text-align: center; margin-top: 40px; font-size: 12px; color: #666; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>${contract.name.toUpperCase()}</h1>
+            <p>Konrad Inversiones + Desarrollos Inmobiliarios</p>
+          </div>
+          <div class="content">
+            ${contractText.replace(/\n/g, '<br>')}
+          </div>
+          <div class="signature-section">
+            <p>En prueba de conformidad, se firma el presente contrato:</p>
+            <div style="margin-top: 30px;">
+              <span>LOCADOR: <span class="signature-line"></span></span>
+              <span>LOCATARIO: <span class="signature-line"></span></span>
+            </div>
+          </div>
+          <div class="company-info">
+            <p>Konrad Inversiones + Desarrollos Inmobiliarios</p>
+            <p>Mat. 12345</p>
+          </div>
+        </body>
+        </html>
+      `;
+      
+      // Crear blob con contenido HTML
+      const blob = new Blob([htmlContent], { type: 'text/html' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      // Mostrar notificación de éxito
+              notifySuccess('Contrato Descargado', 'Contrato descargado exitosamente');
+      } catch (error) {
+        console.error('Error al descargar:', error);
+        notifyError('Error al Descargar', 'Error al descargar el contrato');
+      }
   };
 
   const handlePrint = () => {
-    // Simular impresión
-    window.print();
+    try {
+      const contractText = generateContract(contractData, contractType);
+      
+      // Crear ventana de impresión con formato
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Imprimir Contrato - ${contract.name}</title>
+          <style>
+            @media print {
+              body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
+              .no-print { display: none; }
+            }
+            body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
+            .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }
+            .content { margin-bottom: 30px; }
+            .signature-section { margin-top: 40px; border-top: 1px solid #ccc; padding-top: 20px; }
+            .signature-line { border-bottom: 1px solid #000; display: inline-block; width: 200px; margin: 0 20px; }
+            .company-info { text-align: center; margin-top: 40px; font-size: 12px; color: #666; }
+            .print-button { 
+              position: fixed; top: 20px; right: 20px; 
+              padding: 10px 20px; background: #007bff; color: white; 
+              border: none; border-radius: 5px; cursor: pointer;
+            }
+          </style>
+        </head>
+        <body>
+          <button class="print-button no-print" onclick="window.print()">Imprimir</button>
+          <div class="header">
+            <h1>${contract.name.toUpperCase()}</h1>
+            <p>Konrad Inversiones + Desarrollos Inmobiliarios</p>
+          </div>
+          <div class="content">
+            ${contractText.replace(/\n/g, '<br>')}
+          </div>
+          <div class="signature-section">
+            <p>En prueba de conformidad, se firma el presente contrato:</p>
+            <div style="margin-top: 30px;">
+              <span>LOCADOR: <span class="signature-line"></span></span>
+              <span>LOCATARIO: <span class="signature-line"></span></span>
+            </div>
+          </div>
+          <div class="company-info">
+            <p>Konrad Inversiones + Desarrollos Inmobiliarios</p>
+            <p>Mat. 12345</p>
+          </div>
+        </body>
+        </html>
+      `);
+      printWindow.document.close();
+      
+      // Esperar a que se cargue y luego imprimir
+      printWindow.onload = () => {
+        printWindow.print();
+      };
+            } catch (error) {
+          console.error('Error al imprimir:', error);
+          notifyError('Error al Imprimir', 'Error al imprimir el contrato');
+        }
   };
 
   const handleShare = () => {
-    // Simular compartir
-    // Share functionality
+    try {
+      const contractText = generateContract(contractData, contractType);
+      const fileName = `Contrato_${contract.name.replace(/\s+/g, '_')}_${formatDate(new Date()).replace(/\//g, '-')}.txt`;
+      
+      // Crear opciones de compartir
+      const shareOptions = [
+        {
+          name: 'Email',
+          icon: '📧',
+          action: () => {
+            const subject = encodeURIComponent(`Contrato ${contract.name} - Konrad Inversiones`);
+            const body = encodeURIComponent(`Adjunto el contrato ${contract.name} generado.\n\n${contractText}`);
+            window.open(`mailto:?subject=${subject}&body=${body}`);
+          }
+        },
+        {
+          name: 'WhatsApp',
+          icon: '📱',
+          action: () => {
+            const text = encodeURIComponent(`Contrato ${contract.name} generado por Konrad Inversiones:\n\n${contractText.substring(0, 500)}...`);
+            window.open(`https://wa.me/?text=${text}`);
+          }
+        },
+        {
+          name: 'Copiar Texto',
+          icon: '📋',
+          action: () => {
+            navigator.clipboard.writeText(contractText).then(() => {
+              notifySuccess('Texto Copiado', 'Texto del contrato copiado al portapapeles');
+            }).catch(() => {
+              // Fallback para navegadores que no soportan clipboard API
+              const textArea = document.createElement('textarea');
+              textArea.value = contractText;
+              document.body.appendChild(textArea);
+              textArea.select();
+              document.execCommand('copy');
+              document.body.removeChild(textArea);
+              notifySuccess('Texto Copiado', 'Texto del contrato copiado al portapapeles');
+            });
+          }
+        },
+        {
+          name: 'Descargar',
+          icon: '💾',
+          action: () => {
+            const blob = new Blob([contractText], { type: 'text/plain;charset=utf-8' });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+          }
+        }
+      ];
+      
+      // Mostrar menú de opciones
+      const option = prompt(
+        'Selecciona una opción para compartir:\n' +
+        shareOptions.map((opt, index) => `${index + 1}. ${opt.icon} ${opt.name}`).join('\n') +
+        '\n\nIngresa el número de la opción:'
+      );
+      
+      const selectedIndex = parseInt(option) - 1;
+      if (selectedIndex >= 0 && selectedIndex < shareOptions.length) {
+        shareOptions[selectedIndex].action();
+      } else if (option !== null) {
+        notifyError('Opción Inválida', 'Opción no válida');
+      }
+    } catch (error) {
+      console.error('Error al compartir:', error);
+      notifyError('Error al Compartir', 'Error al compartir el contrato');
+    }
   };
 
   const handleTestContract = () => {
@@ -194,6 +398,15 @@ export default function ContractGeneratePage() {
       {/* Main Content */}
       <main className="container mx-auto px-6 py-12">
         <div className="max-w-4xl mx-auto">
+          {/* Breadcrumbs */}
+          <Breadcrumbs 
+            items={[
+              { label: 'Contratos', href: '/contracts' },
+              { label: contract?.name || 'Contrato', href: `/contracts/${contractType}` },
+              { label: 'Generar' }
+            ]} 
+          />
+          
           {/* Step Indicator */}
           <div className="mb-8">
             <div className="flex items-center justify-center space-x-4">
@@ -472,9 +685,17 @@ export default function ContractGeneratePage() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                     <div className="text-center p-3 bg-neutral-700 rounded-lg">
                       <div className="text-2xl font-bold text-white mb-1">
-                        {Math.round(aiAnalysis.confidence * 100)}%
+                        {Math.max(0, Math.min(100, Math.round(aiAnalysis.confidence * 100)))}%
                       </div>
                       <div className="text-sm text-neutral-400">Confianza</div>
+                      <div className="w-full bg-neutral-600 rounded-full h-2 mt-2">
+                        <div 
+                          className="bg-gradient-to-r from-blue-500 to-green-500 h-2 rounded-full transition-all duration-300"
+                          style={{ 
+                            width: `${Math.max(0, Math.min(100, Math.round(aiAnalysis.confidence * 100)))}%` 
+                          }}
+                        ></div>
+                      </div>
                     </div>
                     <div className="text-center p-3 bg-neutral-700 rounded-lg">
                       <div className="text-2xl font-bold text-white mb-1">

@@ -7,6 +7,7 @@ import { CONTRACT_TYPES } from '@/lib/config';
 import ContractTypeCard from '@/components/ContractTypeCard';
 import PictoNSignature from '@/components/PictoNSignature';
 import { ContractRoute } from '@/components/ProtectedRoute';
+import Breadcrumbs from '@/components/Breadcrumbs';
 
 export default function ContractsPage() {
   return (
@@ -39,6 +40,13 @@ export default function ContractsPage() {
       {/* Main Content */}
       <main className="container mx-auto px-6 py-12">
         <div className="max-w-6xl mx-auto">
+          {/* Breadcrumbs */}
+          <Breadcrumbs 
+            items={[
+              { label: 'Contratos', href: '/contracts' }
+            ]} 
+          />
+          
           {/* Hero Section */}
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-white mb-4">
@@ -69,15 +77,15 @@ export default function ContractsPage() {
               <div className="grid md:grid-cols-3 gap-6 text-sm text-neutral-300">
                 <div>
                   <h4 className="font-semibold text-primary-400 mb-2">Contrato Comercial</h4>
-                  <p>Para locales comerciales con ajuste IPC automático</p>
+                  <p>Para locales comerciales. El ajuste se selecciona al crear el contrato.</p>
                 </div>
                 <div>
                   <h4 className="font-semibold text-secondary-400 mb-2">Contrato Casa</h4>
-                  <p>Para viviendas familiares con ajuste ICL automático</p>
+                  <p>Para viviendas familiares. El ajuste se selecciona al crear el contrato.</p>
                 </div>
                 <div>
                   <h4 className="font-semibold text-success-400 mb-2">Contrato Empresarial</h4>
-                  <p>Para uso empresarial con ajustes específicos</p>
+                  <p>Para uso empresarial. El ajuste se selecciona al crear el contrato.</p>
                 </div>
               </div>
             </div>

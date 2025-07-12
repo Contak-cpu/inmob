@@ -3,6 +3,10 @@
 import React, { useState } from 'react';
 import { Home, Download, Printer, Share2, FileText, ArrowLeft, Receipt, Wrench } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { generateAndSaveReceipt } from '@/utils/receiptGenerator';
+import { formatDate } from '@/utils/formatters';
+import { notifySuccess, notifyError } from '@/utils/notifications';
+import Breadcrumbs from '@/components/Breadcrumbs';
 
 const testDataAlquiler = {
   tenantName: 'Juan Pérez',
@@ -162,10 +166,215 @@ export default function ReceiptForm({ receiptType }) {
   // --- ALQUILER ---
   if (receiptType === 'alquiler') {
     const handleChange = (e) => {
-      setForm({ ...form, [e.target.name]: e.target.value });
+      const { name, value } = e.target;
+      let newValue = value;
+      
+      // Validar valores numéricos
+      if (['amount', 'expenses', 'totalAmount'].includes(name)) {
+        const numValue = parseFloat(value);
+        if (value && (isNaN(numValue) || numValue < 0)) {
+          return; // No actualizar si el valor no es válido
+        }
+        newValue = value === '' ? '' : numValue.toString();
+      }
+      
+      const newForm = { ...form, [name]: newValue };
+      
+      // Calcular total automáticamente para alquiler
+      if (name === 'amount' || name === 'expenses') {
+        const amount = parseFloat(newForm.amount) || 0;
+        const expenses = parseFloat(newForm.expenses) || 0;
+        newForm.totalAmount = (amount + expenses).toString();
+      }
+      
+      setForm(newForm);
     };
     const handleTest = () => setForm(testDataAlquiler);
     const handleBack = () => router.push('/receipts');
+    
+    const handleDownload = async () => {
+      try {
+        const result = await generateAndSaveReceipt(form, 'alquiler');
+        if (result.success) {
+          const fileName = `Recibo_Alquiler_${form.tenantName?.replace(/\s+/g, '_')}_${formatDate(new Date()).replace(/\//g, '-')}.txt`;
+          
+          // Crear contenido HTML para descarga
+          const htmlContent = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <meta charset="utf-8">
+              <title>Recibo de Alquiler</title>
+              <style>
+                body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
+                .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }
+                .content { margin-bottom: 30px; }
+                .signature-section { margin-top: 40px; border-top: 1px solid #ccc; padding-top: 20px; }
+                .signature-line { border-bottom: 1px solid #000; display: inline-block; width: 200px; margin: 0 20px; }
+                .company-info { text-align: center; margin-top: 40px; font-size: 12px; color: #666; }
+              </style>
+            </head>
+            <body>
+              <div class="header">
+                <h1>RECIBO DE ALQUILER</h1>
+                <p>Konrad Inversiones + Desarrollos Inmobiliarios</p>
+              </div>
+              <div class="content">
+                ${result.receipt.receiptText.replace(/\n/g, '<br>')}
+              </div>
+              <div class="signature-section">
+                <p>Firma: <span class="signature-line"></span></p>
+              </div>
+              <div class="company-info">
+                <p>Konrad Inversiones + Desarrollos Inmobiliarios</p>
+                <p>Mat. 12345</p>
+              </div>
+            </body>
+            </html>
+          `;
+          
+          const blob = new Blob([htmlContent], { type: 'text/html' });
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = fileName;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+          
+          notifySuccess('Recibo Descargado', 'Recibo descargado y guardado en el historial exitosamente');
+        } else {
+          notifyError('Error al Generar', 'Error al generar el recibo');
+        }
+      } catch (error) {
+        console.error('Error al descargar recibo:', error);
+        notifyError('Error al Descargar', 'Error al descargar el recibo');
+      }
+    };
+    
+    const handlePrint = async () => {
+      try {
+        const result = await generateAndSaveReceipt(form, 'alquiler');
+        if (result.success) {
+          const printWindow = window.open('', '_blank');
+          printWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <title>Imprimir Recibo de Alquiler</title>
+              <style>
+                @media print {
+                  body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
+                  .no-print { display: none; }
+                }
+                body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
+                .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }
+                .content { margin-bottom: 30px; }
+                .signature-section { margin-top: 40px; border-top: 1px solid #ccc; padding-top: 20px; }
+                .signature-line { border-bottom: 1px solid #000; display: inline-block; width: 200px; margin: 0 20px; }
+                .company-info { text-align: center; margin-top: 40px; font-size: 12px; color: #666; }
+                .print-button { 
+                  position: fixed; top: 20px; right: 20px; 
+                  padding: 10px 20px; background: #007bff; color: white; 
+                  border: none; border-radius: 5px; cursor: pointer;
+                }
+              </style>
+            </head>
+            <body>
+              <button class="print-button no-print" onclick="window.print()">Imprimir</button>
+              <div class="header">
+                <h1>RECIBO DE ALQUILER</h1>
+                <p>Konrad Inversiones + Desarrollos Inmobiliarios</p>
+              </div>
+              <div class="content">
+                ${result.receipt.receiptText.replace(/\n/g, '<br>')}
+              </div>
+              <div class="signature-section">
+                <p>Firma: <span class="signature-line"></span></p>
+              </div>
+              <div class="company-info">
+                <p>Konrad Inversiones + Desarrollos Inmobiliarios</p>
+                <p>Mat. 12345</p>
+              </div>
+            </body>
+            </html>
+          `);
+          printWindow.document.close();
+          
+          printWindow.onload = () => {
+            printWindow.print();
+          };
+        } else {
+          notifyError('Error al Generar', 'Error al generar el recibo');
+        }
+      } catch (error) {
+        console.error('Error al imprimir recibo:', error);
+        notifyError('Error al Imprimir', 'Error al imprimir el recibo');
+      }
+    };
+    
+    const handleShare = async () => {
+      try {
+        const result = await generateAndSaveReceipt(form, 'alquiler');
+        if (result.success) {
+          const shareOptions = [
+            {
+              name: 'Email',
+              icon: '📧',
+              action: () => {
+                const subject = encodeURIComponent(`Recibo de Alquiler - Konrad Inversiones`);
+                const body = encodeURIComponent(`Adjunto el recibo de alquiler generado.\n\n${result.receipt.receiptText}`);
+                window.open(`mailto:?subject=${subject}&body=${body}`);
+              }
+            },
+            {
+              name: 'WhatsApp',
+              icon: '📱',
+              action: () => {
+                const text = encodeURIComponent(`Recibo de Alquiler generado por Konrad Inversiones:\n\n${result.receipt.receiptText.substring(0, 500)}...`);
+                window.open(`https://wa.me/?text=${text}`);
+              }
+            },
+            {
+              name: 'Copiar Texto',
+              icon: '📋',
+              action: () => {
+                navigator.clipboard.writeText(result.receipt.receiptText).then(() => {
+                  notifySuccess('Texto Copiado', 'Texto del recibo copiado al portapapeles');
+                }).catch(() => {
+                  const textArea = document.createElement('textarea');
+                  textArea.value = result.receipt.receiptText;
+                  document.body.appendChild(textArea);
+                  textArea.select();
+                  document.execCommand('copy');
+                  document.body.removeChild(textArea);
+                  notifySuccess('Texto Copiado', 'Texto del recibo copiado al portapapeles');
+                });
+              }
+            }
+          ];
+          
+          const option = prompt(
+            'Selecciona una opción para compartir:\n' +
+            shareOptions.map((opt, index) => `${index + 1}. ${opt.icon} ${opt.name}`).join('\n') +
+            '\n\nIngresa el número de la opción:'
+          );
+          
+          const selectedIndex = parseInt(option) - 1;
+          if (selectedIndex >= 0 && selectedIndex < shareOptions.length) {
+            shareOptions[selectedIndex].action();
+          } else if (option !== null) {
+            notifyError('Opción Inválida', 'Opción no válida');
+          }
+        } else {
+          notifyError('Error al Generar', 'Error al generar el recibo');
+        }
+      } catch (error) {
+        console.error('Error al compartir recibo:', error);
+        notifyError('Error al Compartir', 'Error al compartir el recibo');
+      }
+    };
     return (
       <div className="max-w-3xl mx-auto bg-neutral-900 rounded-xl shadow-lg p-6 mt-8">
         {/* Header */}
@@ -185,6 +394,24 @@ export default function ReceiptForm({ receiptType }) {
         </div>
         {/* Formulario */}
         <form className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          {/* Resumen de cálculo para alquiler */}
+          <div className="md:col-span-2 p-4 bg-neutral-800/50 rounded-lg border border-neutral-700">
+            <h4 className="text-sm font-semibold text-neutral-300 mb-2">Resumen de Cálculo</h4>
+            <div className="grid grid-cols-3 gap-4 text-sm">
+              <div>
+                <span className="text-neutral-400">Alquiler:</span>
+                <span className="text-white ml-2">${parseFloat(form.amount) || 0}</span>
+              </div>
+              <div>
+                <span className="text-neutral-400">Gastos:</span>
+                <span className="text-white ml-2">${parseFloat(form.expenses) || 0}</span>
+              </div>
+              <div className="font-semibold">
+                <span className="text-primary-400">Total:</span>
+                <span className="text-primary-400 ml-2">${parseFloat(form.totalAmount) || 0}</span>
+              </div>
+            </div>
+          </div>
           <div>
             <label className="block text-sm font-medium text-neutral-300 mb-1">Nombre del Inquilino *</label>
             <input name="tenantName" value={form.tenantName || ''} onChange={handleChange} className="input-field" required />
@@ -213,12 +440,32 @@ export default function ReceiptForm({ receiptType }) {
             <input name="amount" type="number" value={form.amount || ''} onChange={handleChange} className="input-field" required />
           </div>
           <div>
-            <label className="block text-sm font-medium text-neutral-300 mb-1">Gastos Adicionales</label>
-            <input name="expenses" type="number" value={form.expenses || ''} onChange={handleChange} className="input-field" />
+            <label className="block text-sm font-medium text-neutral-300 mb-1">
+              Gastos Adicionales
+              <span className="text-xs text-neutral-500 ml-1">(Opcional)</span>
+            </label>
+            <input 
+              name="expenses" 
+              type="number" 
+              value={form.expenses || ''} 
+              onChange={handleChange} 
+              className="input-field" 
+              placeholder="Ej: 5000"
+            />
+            <p className="text-xs text-neutral-400 mt-1">Servicios, expensas o gastos extraordinarios</p>
           </div>
           <div>
             <label className="block text-sm font-medium text-neutral-300 mb-1">Total Pagado *</label>
-            <input name="totalAmount" type="number" value={form.totalAmount || ''} onChange={handleChange} className="input-field" required />
+            <input 
+              name="totalAmount" 
+              type="number" 
+              value={form.totalAmount || ''} 
+              onChange={handleChange} 
+              className="input-field bg-neutral-700 cursor-not-allowed" 
+              readOnly 
+              required 
+            />
+            <p className="text-xs text-neutral-400 mt-1">Calculado automáticamente: Alquiler + Gastos</p>
           </div>
           <div>
             <label className="block text-sm font-medium text-neutral-300 mb-1">Forma de Pago *</label>
@@ -259,18 +506,34 @@ export default function ReceiptForm({ receiptType }) {
         </div>
         {/* Acciones */}
         <div className="flex justify-center space-x-4">
-          <button className="btn-primary flex items-center space-x-2">
+          <button onClick={handleDownload} className="btn-primary flex items-center space-x-2">
             <Download className="h-4 w-4" />
             <span>Descargar</span>
           </button>
-          <button className="btn-primary flex items-center space-x-2">
+          <button onClick={handlePrint} className="btn-primary flex items-center space-x-2">
             <Printer className="h-4 w-4" />
             <span>Imprimir</span>
           </button>
-          <button className="btn-primary flex items-center space-x-2">
+          <button onClick={handleShare} className="btn-primary flex items-center space-x-2">
             <Share2 className="h-4 w-4" />
             <span>Compartir</span>
           </button>
+        </div>
+        
+        {/* Información útil */}
+        <div className="mt-6 p-4 bg-neutral-800/50 rounded-lg border border-neutral-700">
+          <div className="flex items-start space-x-3">
+            <div className="text-primary-400 mt-0.5">ℹ️</div>
+            <div>
+              <h4 className="text-sm font-semibold text-neutral-300 mb-2">Información Útil</h4>
+              <div className="space-y-1 text-xs text-neutral-400">
+                <p>• El recibo se guarda automáticamente en el historial</p>
+                <p>• Puede descargar como PDF o imprimir directamente</p>
+                <p>• Los totales se calculan automáticamente</p>
+                <p>• Use el botón "Test Recibo" para cargar datos de ejemplo</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -279,7 +542,28 @@ export default function ReceiptForm({ receiptType }) {
   // --- REPARACION ---
   if (receiptType === 'reparacion') {
     const handleChange = (e) => {
-      setForm({ ...form, [e.target.name]: e.target.value });
+      const { name, value } = e.target;
+      let newValue = value;
+      
+      // Validar valores numéricos
+      if (['materialsCost', 'laborCost', 'totalAmount', 'laborHours', 'warranty'].includes(name)) {
+        const numValue = parseFloat(value);
+        if (value && (isNaN(numValue) || numValue < 0)) {
+          return; // No actualizar si el valor no es válido
+        }
+        newValue = value === '' ? '' : numValue.toString();
+      }
+      
+      const newForm = { ...form, [name]: newValue };
+      
+      // Calcular total automáticamente para reparación
+      if (name === 'materialsCost' || name === 'laborCost') {
+        const materialsCost = parseFloat(newForm.materialsCost) || 0;
+        const laborCost = parseFloat(newForm.laborCost) || 0;
+        newForm.totalAmount = (materialsCost + laborCost).toString();
+      }
+      
+      setForm(newForm);
     };
     const handleTest = () => setForm(testDataReparacion);
     const handleBack = () => router.push('/receipts');
@@ -302,6 +586,24 @@ export default function ReceiptForm({ receiptType }) {
         </div>
         {/* Formulario */}
         <form className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          {/* Resumen de cálculo para reparación */}
+          <div className="md:col-span-2 p-4 bg-neutral-800/50 rounded-lg border border-neutral-700">
+            <h4 className="text-sm font-semibold text-neutral-300 mb-2">Resumen de Cálculo</h4>
+            <div className="grid grid-cols-3 gap-4 text-sm">
+              <div>
+                <span className="text-neutral-400">Materiales:</span>
+                <span className="text-white ml-2">${parseFloat(form.materialsCost) || 0}</span>
+              </div>
+              <div>
+                <span className="text-neutral-400">Mano de Obra:</span>
+                <span className="text-white ml-2">${parseFloat(form.laborCost) || 0}</span>
+              </div>
+              <div className="font-semibold">
+                <span className="text-red-400">Total:</span>
+                <span className="text-red-400 ml-2">${parseFloat(form.totalAmount) || 0}</span>
+              </div>
+            </div>
+          </div>
           <div>
             <label className="block text-sm font-medium text-neutral-300 mb-1">Nombre del Cliente *</label>
             <input name="clientName" value={form.clientName || ''} onChange={handleChange} className="input-field" required />
@@ -327,11 +629,30 @@ export default function ReceiptForm({ receiptType }) {
           </div>
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-neutral-300 mb-1">Descripción de la Reparación *</label>
-            <textarea name="repairDescription" value={form.repairDescription || ''} onChange={handleChange} className="input-field" required rows={2} />
+            <textarea 
+              name="repairDescription" 
+              value={form.repairDescription || ''} 
+              onChange={handleChange} 
+              className="input-field" 
+              required 
+              rows={2}
+              placeholder="Describa detalladamente el trabajo realizado..."
+            />
+            <p className="text-xs text-neutral-400 mt-1">Incluya detalles técnicos y especificaciones del trabajo</p>
           </div>
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-neutral-300 mb-1">Materiales Utilizados</label>
-            <input name="materialsUsed" value={form.materialsUsed || ''} onChange={handleChange} className="input-field" />
+            <label className="block text-sm font-medium text-neutral-300 mb-1">
+              Materiales Utilizados
+              <span className="text-xs text-neutral-500 ml-1">(Opcional)</span>
+            </label>
+            <input 
+              name="materialsUsed" 
+              value={form.materialsUsed || ''} 
+              onChange={handleChange} 
+              className="input-field"
+              placeholder="Ej: Cañería PVC, sellador, pintura..."
+            />
+            <p className="text-xs text-neutral-400 mt-1">Liste los materiales principales utilizados</p>
           </div>
           <div>
             <label className="block text-sm font-medium text-neutral-300 mb-1">Horas Mano de Obra</label>
@@ -347,7 +668,16 @@ export default function ReceiptForm({ receiptType }) {
           </div>
           <div>
             <label className="block text-sm font-medium text-neutral-300 mb-1">Total Pagado *</label>
-            <input name="totalAmount" type="number" value={form.totalAmount || ''} onChange={handleChange} className="input-field" required />
+            <input 
+              name="totalAmount" 
+              type="number" 
+              value={form.totalAmount || ''} 
+              onChange={handleChange} 
+              className="input-field bg-neutral-700 cursor-not-allowed" 
+              readOnly 
+              required 
+            />
+            <p className="text-xs text-neutral-400 mt-1">Calculado automáticamente: Materiales + Mano de Obra</p>
           </div>
           <div>
             <label className="block text-sm font-medium text-neutral-300 mb-1">Forma de Pago *</label>
@@ -357,8 +687,20 @@ export default function ReceiptForm({ receiptType }) {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-neutral-300 mb-1">Garantía (días)</label>
-            <input name="warranty" type="number" value={form.warranty || ''} onChange={handleChange} className="input-field" />
+            <label className="block text-sm font-medium text-neutral-300 mb-1">
+              Garantía (días)
+              <span className="text-xs text-neutral-500 ml-1">(Opcional)</span>
+            </label>
+            <input 
+              name="warranty" 
+              type="number" 
+              value={form.warranty || ''} 
+              onChange={handleChange} 
+              className="input-field"
+              placeholder="Ej: 30"
+              min="0"
+            />
+            <p className="text-xs text-neutral-400 mt-1">Período de garantía del trabajo realizado</p>
           </div>
         </form>
         {/* Selector de preview */}
@@ -400,6 +742,23 @@ export default function ReceiptForm({ receiptType }) {
             <Share2 className="h-4 w-4" />
             <span>Compartir</span>
           </button>
+        </div>
+        
+        {/* Información útil */}
+        <div className="mt-6 p-4 bg-neutral-800/50 rounded-lg border border-neutral-700">
+          <div className="flex items-start space-x-3">
+            <div className="text-red-400 mt-0.5">ℹ️</div>
+            <div>
+              <h4 className="text-sm font-semibold text-neutral-300 mb-2">Información Útil</h4>
+              <div className="space-y-1 text-xs text-neutral-400">
+                <p>• El recibo se guarda automáticamente en el historial</p>
+                <p>• Puede descargar como PDF o imprimir directamente</p>
+                <p>• Los totales se calculan automáticamente (Materiales + Mano de Obra)</p>
+                <p>• Use el botón "Test Recibo" para cargar datos de ejemplo</p>
+                <p>• La garantía es opcional pero recomendada para trabajos importantes</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );

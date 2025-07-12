@@ -178,7 +178,10 @@ export const generateAndSaveReceipt = async (receiptData, receiptType) => {
       message: 'Recibo generado y guardado exitosamente'
     };
   } catch (error) {
-    console.error('Error al generar y guardar recibo:', error);
+    // Error silencioso en producción
+    if (process.env.NODE_ENV !== 'production') {
+      console.error('Error al generar y guardar recibo:', error);
+    }
     return {
       success: false,
       error: error.message,

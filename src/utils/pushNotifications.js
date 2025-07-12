@@ -27,7 +27,10 @@ const pushSubscription = null;
 // Solicitar permisos de notificación push
 export const requestPushPermission = async () => {
   if (!('Notification' in window)) {
-    console.log('Este navegador no soporta notificaciones push');
+    // Log silencioso en producción
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('Este navegador no soporta notificaciones push');
+    }
     return false;
   }
 
@@ -37,7 +40,10 @@ export const requestPushPermission = async () => {
   }
 
   if (Notification.permission === 'denied') {
-    console.log('Permisos de notificación denegados');
+    // Log silencioso en producción
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('Permisos de notificación denegados');
+    }
     return false;
   }
 
@@ -46,7 +52,10 @@ export const requestPushPermission = async () => {
     pushPermission = permission === 'granted';
     return pushPermission;
   } catch (error) {
-    console.error('Error al solicitar permisos de notificación:', error);
+    // Error silencioso en producción
+    if (process.env.NODE_ENV !== 'production') {
+      console.error('Error al solicitar permisos de notificación:', error);
+    }
     return false;
   }
 };

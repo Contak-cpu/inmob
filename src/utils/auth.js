@@ -1,5 +1,18 @@
 // Sistema de autenticación para Konrad Inmobiliaria
 
+// Sistema de logging silencioso en producción
+const logError = (message, error) => {
+  if (process.env.NODE_ENV !== 'production') {
+    console.error(message, error);
+  }
+};
+
+const logInfo = (message) => {
+  if (process.env.NODE_ENV !== 'production') {
+    console.log(message);
+  }
+};
+
 // Tipos de usuarios
 export const USER_ROLES = {
   ADMIN: 'admin',
@@ -362,24 +375,24 @@ const generateId = () => {
   return Date.now().toString(36) + Math.random().toString(36).substr(2);
 };
 
-// Obtener datos del localStorage
+// Función para obtener datos del localStorage
 const getFromStorage = (key, defaultValue = null) => {
   try {
     const data = localStorage.getItem(key);
     return data ? JSON.parse(data) : defaultValue;
   } catch (error) {
-    console.error(`Error al leer de localStorage (${key}):`, error);
+    logError(`Error al leer de localStorage (${key}):`, error);
     return defaultValue;
   }
 };
 
-// Guardar datos en localStorage
+// Función para guardar datos en localStorage
 const saveToStorage = (key, data) => {
   try {
     localStorage.setItem(key, JSON.stringify(data));
     return true;
   } catch (error) {
-    console.error(`Error al guardar en localStorage (${key}):`, error);
+    logError(`Error al guardar en localStorage (${key}):`, error);
     return false;
   }
 };
@@ -387,21 +400,24 @@ const saveToStorage = (key, data) => {
 // ===== INICIALIZACIÓN =====
 
 // Inicializar sistema de autenticación
-export const initializeAuth = () => {
-  initializeUsers();
-  
-  // Verificar sesión existente
+// Verificar sesión existente
+const checkSession = () => {
   if (isAuthenticated()) {
-    console.log('Usuario autenticado:', getCurrentUser());
+    logInfo('Usuario autenticado:', getCurrentUser());
   }
   
   // Configurar listener para sesión expirada
   if (typeof window !== 'undefined') {
     window.addEventListener('sessionExpired', () => {
-      // eslint-disable-next-line no-alert
-      alert('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
+      // Notificación de sesión expirada se maneja en el componente
     });
   }
+};
+
+export const initializeAuth = () => {
+  initializeUsers();
+  checkSession();
+  logInfo('Sistema de autenticación inicializado');
 };
 
 // Inicializar cuando el DOM esté listo
