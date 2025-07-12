@@ -17,6 +17,7 @@ import Breadcrumbs from '@/components/Breadcrumbs';
 import StatsCard from '@/components/ui/StatsCard';
 import { useNotifications } from '@/hooks/useNotifications';
 import Button from '@/components/ui/Button';
+import Link from 'next/link';
 
 export default function DashboardPage() {
   const [user, setUser] = useState(null);
@@ -115,9 +116,11 @@ export default function DashboardPage() {
             >
               Probar Notificaciones
             </Button>
-            <div className="p-3 bg-primary-500/20 rounded-xl">
-              <BarChart3 className="h-6 w-6 text-primary-400" />
-            </div>
+            <Link href="/analytics" title="Ver Estadísticas">
+              <div className="p-3 bg-primary-500/20 rounded-xl cursor-pointer hover:bg-primary-500/40 transition-colors">
+                <BarChart3 className="h-6 w-6 text-primary-400" />
+              </div>
+            </Link>
           </div>
         </div>
       </div>

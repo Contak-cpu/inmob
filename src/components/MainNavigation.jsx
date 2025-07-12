@@ -166,13 +166,13 @@ export default function MainNavigation({ children }) {
       <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
         <div className="flex flex-col flex-grow bg-neutral-800 border-r border-neutral-700">
           {/* Logo */}
-          <div className="flex items-center space-x-3 p-6 border-b border-neutral-700">
+          <Link href="/dashboard" className="flex items-center space-x-3 p-6 border-b border-neutral-700 hover:bg-neutral-700/30 transition-colors">
             <Building className="h-8 w-8 text-primary-400" />
             <div>
               <h1 className="text-lg font-bold text-white">Konrad</h1>
               <p className="text-xs text-neutral-400">Inmobiliaria</p>
             </div>
-          </div>
+          </Link>
 
           {/* Navegación */}
           <nav className="flex-1 p-4 space-y-2">
@@ -253,6 +253,15 @@ export default function MainNavigation({ children }) {
                 <Bell className="h-5 w-5 text-neutral-400" />
                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-error-400 rounded-full"></div>
               </button>
+
+              {/* Estadísticas (Header) */}
+              <Link
+                href="/analytics"
+                className="p-2 hover:bg-neutral-700/50 rounded-lg relative"
+                title="Ver Estadísticas"
+              >
+                <BarChart3 className="h-5 w-5 text-neutral-400" />
+              </Link>
 
               {/* Perfil móvil */}
               <div className="lg:hidden">
