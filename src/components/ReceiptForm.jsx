@@ -481,7 +481,7 @@ export default function ReceiptForm({ receiptType }) {
                 <p>• El recibo se guarda automáticamente en el historial</p>
                 <p>• Puede descargar como PDF o imprimir directamente</p>
                 <p>• Los totales se calculan automáticamente</p>
-                <p>• Use el botón "Test Recibo" para cargar datos de ejemplo</p>
+                <p>• Use el botón &quot;Test Recibo&quot; para cargar datos de ejemplo</p>
               </div>
             </div>
           </div>
@@ -705,7 +705,7 @@ export default function ReceiptForm({ receiptType }) {
                 <p>• El recibo se guarda automáticamente en el historial</p>
                 <p>• Puede descargar como PDF o imprimir directamente</p>
                 <p>• Los totales se calculan automáticamente (Materiales + Mano de Obra)</p>
-                <p>• Use el botón "Test Recibo" para cargar datos de ejemplo</p>
+                <p>• Use el botón &quot;Test Recibo&quot; para cargar datos de ejemplo</p>
                 <p>• La garantía es opcional pero recomendada para trabajos importantes</p>
               </div>
             </div>
