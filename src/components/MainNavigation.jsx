@@ -7,18 +7,14 @@ import {
   FileText, 
   Receipt, 
   Building, 
-  Home, 
-  Settings, 
   History, 
-  Bell, 
   Menu, 
   X, 
   ChevronRight,
   BarChart3,
   Users,
   LogOut,
-  User,
-  Shield
+  User
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUI } from '@/hooks/useUI';

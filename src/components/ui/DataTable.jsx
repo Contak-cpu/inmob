@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { ChevronUp, ChevronDown, Search, Filter, MoreHorizontal } from 'lucide-react';
+import { ChevronUp, ChevronDown, Search, MoreHorizontal } from 'lucide-react';
 
 /**
  * Componente reutilizable para tablas de datos
@@ -247,7 +247,7 @@ export default function DataTable({
           </span>
           {searchTerm && (
             <span>
-              Filtrado por "{searchTerm}"
+              Filtrado por &quot;{searchTerm}&quot;
             </span>
           )}
         </div>

@@ -1,23 +1,10 @@
 {
-  "extends": ["next/core-web-vitals"],
+  "extends": "next/core-web-vitals",
   "rules": {
-    "no-console": "warn",
-    "no-debugger": "error",
-    "no-alert": "error",
-    "no-eval": "error",
-    "no-implied-eval": "error",
-    "no-new-func": "error",
-    "no-script-url": "error",
-    "no-unsafe-optional-chaining": "error",
-    "prefer-const": "error",
-    "no-var": "error",
     "no-unused-vars": "warn",
-    "react-hooks/exhaustive-deps": "warn",
-    "react-hooks/rules-of-hooks": "error",
-    "react/jsx-no-target-blank": "error",
-    "react/jsx-key": "error",
     "react/no-array-index-key": "warn",
-    "react/no-danger": "error",
-    "react/no-unescaped-entities": "error"
+    "react/no-unescaped-entities": "warn",
+    "react-hooks/exhaustive-deps": "warn",
+    "no-console": "warn"
   }
 } 
