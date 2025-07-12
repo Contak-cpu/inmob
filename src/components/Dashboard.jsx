@@ -13,6 +13,9 @@ import {
 } from '@/utils/pushNotifications';
 import { getSyncState } from '@/utils/cloudSync';
 import { getAPIState } from '@/utils/externalAPIs';
+import ReactSwitch from 'react-switch';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 function getMockDashboardData(period) {
   // Simula datos para el dashboard
@@ -44,8 +47,51 @@ export default function Dashboard() {
   const [syncState, setSyncState] = useState({});
   const [apiState, setApiState] = useState({});
   const [mocked, setMocked] = useState(false);
+  const [useMock, setUseMock] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('useMockDashboardData');
+      return saved === null ? true : saved === 'true';
+    }
+    return true;
+  });
+  const [filters, setFilters] = useState({
+    startDate: null,
+    endDate: null,
+    contractType: '',
+    contractStatus: '',
+    paymentStatus: '',
+  });
+
+  // Opciones de filtros
+  const contractTypes = [
+    { value: '', label: 'Todos' },
+    { value: 'comercial', label: 'Comercial' },
+    { value: 'vivienda', label: 'Vivienda' },
+    { value: 'empresa', label: 'Empresa' },
+  ];
+  const contractStatuses = [
+    { value: '', label: 'Todos' },
+    { value: 'activo', label: 'Activo' },
+    { value: 'finalizado', label: 'Finalizado' },
+    { value: 'pendiente', label: 'Pendiente' },
+  ];
+  const paymentStatuses = [
+    { value: '', label: 'Todos' },
+    { value: 'pagado', label: 'Pagado' },
+    { value: 'pendiente', label: 'Pendiente' },
+    { value: 'vencido', label: 'Vencido' },
+  ];
+
+  // Función para aplicar filtros a los datos (simulada, deberías adaptar a tus datos reales)
+  const applyFilters = (data) => {
+    if (!data) return data;
+    // Aquí deberías filtrar los datos reales según los filtros seleccionados
+    // Por ahora, solo retorna los datos sin filtrar
+    return data;
+  };
 
   useEffect(() => {
+    localStorage.setItem('useMockDashboardData', useMock);
     loadDashboardData();
     initializePushNotifications();
     
@@ -56,7 +102,7 @@ export default function Dashboard() {
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [period]);
+  }, [period, useMock]);
 
   const loadDashboardData = async () => {
     setLoading(true);
@@ -67,11 +113,15 @@ export default function Dashboard() {
         !fullReport ||
         !kpiData ||
         Object.values(kpiData).every((v) => !v || v === 0);
-      if (isEmpty) {
+      if (isEmpty && useMock) {
         const mock = getMockDashboardData(period);
         setReport(mock.report);
         setKpis(mock.kpis);
         setMocked(true);
+      } else if (isEmpty && !useMock) {
+        setReport(null);
+        setKpis({});
+        setMocked(false);
       } else {
         setReport(fullReport);
         setKpis(kpiData);
@@ -141,8 +191,20 @@ export default function Dashboard() {
             </h1>
             <p className="text-gray-600">Análisis y reportes en tiempo real</p>
           </div>
-          
           <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-gray-700">Datos simulados</span>
+              <ReactSwitch
+                checked={useMock}
+                onChange={setUseMock}
+                onColor="#4F46E5"
+                offColor="#E5E7EB"
+                checkedIcon={<div style={{color: 'white', fontSize: 12, paddingLeft: 6}}>ON</div>}
+                uncheckedIcon={<div style={{color: '#4F46E5', fontSize: 12, paddingLeft: 2}}>OFF</div>}
+                height={22}
+                width={48}
+              />
+            </div>
             <select
               value={period}
               onChange={(e) => setPeriod(e.target.value)}
@@ -153,7 +215,6 @@ export default function Dashboard() {
               <option value={ANALYSIS_PERIODS.QUARTER}>Último trimestre</option>
               <option value={ANALYSIS_PERIODS.YEAR}>Último año</option>
             </select>
-            
             <button
               onClick={handlePushPermission}
               className={`px-4 py-2 rounded-lg font-medium ${
@@ -166,6 +227,74 @@ export default function Dashboard() {
             </button>
           </div>
         </div>
+        {/* Filtros avanzados */}
+        <div className="mb-8 flex flex-wrap gap-4 items-end bg-white p-4 rounded-lg shadow border border-gray-200">
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">Desde</label>
+            <DatePicker
+              selected={filters.startDate}
+              onChange={date => setFilters(f => ({ ...f, startDate: date }))}
+              dateFormat="dd/MM/yyyy"
+              className="input-field w-36"
+              placeholderText="Fecha inicio"
+              isClearable
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">Hasta</label>
+            <DatePicker
+              selected={filters.endDate}
+              onChange={date => setFilters(f => ({ ...f, endDate: date }))}
+              dateFormat="dd/MM/yyyy"
+              className="input-field w-36"
+              placeholderText="Fecha fin"
+              isClearable
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">Tipo de Contrato</label>
+            <select
+              value={filters.contractType}
+              onChange={e => setFilters(f => ({ ...f, contractType: e.target.value }))}
+              className="input-field w-40"
+            >
+              {contractTypes.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">Estado Contrato</label>
+            <select
+              value={filters.contractStatus}
+              onChange={e => setFilters(f => ({ ...f, contractStatus: e.target.value }))}
+              className="input-field w-40"
+            >
+              {contractStatuses.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">Estado de Pago</label>
+            <select
+              value={filters.paymentStatus}
+              onChange={e => setFilters(f => ({ ...f, paymentStatus: e.target.value }))}
+              className="input-field w-40"
+            >
+              {paymentStatuses.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+        {/* Mensaje amigable si no hay datos */}
+        {!mocked && (!report || Object.keys(kpis).length === 0) && (
+          <div className="mb-8 p-6 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 rounded">
+            <h2 className="text-lg font-semibold mb-2">No hay datos disponibles</h2>
+            <p>Actualmente no hay datos reales cargados. Puedes crear contratos y recibos reales, o activar los datos simulados con el switch de arriba para ver un ejemplo de análisis.</p>
+          </div>
+        )}
 
         {/* KPIs Principales */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

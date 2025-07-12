@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { isAuthenticated, hasPermission, getCurrentUser } from '@/utils/auth';
+import React from 'react';
+import { hasPermission } from '@/utils/auth';
 import LoginForm from './LoginForm';
-import { notifyError } from '@/utils/notifications';
+import LoadingScreen from './LoadingScreen';
+import { useApp } from '@/contexts/AppContext';
 
 export default function ProtectedRoute({ 
   children, 
@@ -11,56 +12,19 @@ export default function ProtectedRoute({
   fallback = null,
   showLogin = true 
 }) {
-  const [isLoading, setIsLoading] = useState(true);
-  const [isAuth, setIsAuth] = useState(false);
-  const [hasAccess, setHasAccess] = useState(false);
+  const { isLoading, isAuthenticated, user } = useApp();
 
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
-  const checkAuth = () => {
-    const authenticated = isAuthenticated();
-    setIsAuth(authenticated);
-    
-    if (authenticated) {
-      if (requiredPermission) {
-        const hasAccessPermission = hasPermission(requiredPermission);
-        setHasAccess(hasAccessPermission);
-        
-        if (!hasAccessPermission) {
-          notifyError('Acceso denegado', 'No tienes permisos para acceder a esta sección');
-        }
-      } else {
-        setHasAccess(true);
-      }
-    }
-    
-    setIsLoading(false);
-  };
-
-  const handleLoginSuccess = (user) => {
-    checkAuth();
-  };
-
-  // Mostrar loading
+  // Mostrar loading mientras se inicializa
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-neutral-900 via-neutral-800 to-neutral-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-400 mx-auto mb-4"></div>
-          <p className="text-neutral-400">Verificando autenticación...</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen message="Verificando autenticación..." />;
   }
 
   // Usuario no autenticado
-  if (!isAuth) {
+  if (!isAuthenticated) {
     if (showLogin) {
       return (
         <div className="min-h-screen bg-gradient-to-br from-neutral-900 via-neutral-800 to-neutral-900 flex items-center justify-center p-4">
-          <LoginForm onLoginSuccess={handleLoginSuccess} />
+          <LoginForm />
         </div>
       );
     }
@@ -87,7 +51,7 @@ export default function ProtectedRoute({
   }
 
   // Usuario autenticado pero sin permisos
-  if (!hasAccess) {
+  if (requiredPermission && !hasPermission(requiredPermission)) {
     return fallback || (
       <div className="min-h-screen bg-gradient-to-br from-neutral-900 via-neutral-800 to-neutral-900 flex items-center justify-center">
         <div className="text-center">

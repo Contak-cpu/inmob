@@ -2,16 +2,15 @@
 
 import React, { useState } from 'react';
 import { Eye, EyeOff, Lock, User, AlertCircle, CheckCircle } from 'lucide-react';
-import { login } from '@/utils/auth';
-import { notifyError, notifySuccess } from '@/utils/notifications';
+import { useApp } from '@/contexts/AppContext';
 
 export default function LoginForm({ onLoginSuccess }) {
+  const { login, isLoading } = useApp();
   const [formData, setFormData] = useState({
     username: '',
     password: '',
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -23,7 +22,6 @@ export default function LoginForm({ onLoginSuccess }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
     setError('');
     setSuccess('');
 
@@ -32,7 +30,6 @@ export default function LoginForm({ onLoginSuccess }) {
       
       if (result.success) {
         setSuccess('Inicio de sesión exitoso');
-        notifySuccess('Bienvenido', `Hola ${result.user.name}`);
         
         // Limpiar formulario
         setFormData({ username: '', password: '' });
@@ -43,13 +40,9 @@ export default function LoginForm({ onLoginSuccess }) {
         }
       } else {
         setError(result.error);
-        notifyError('Error de autenticación', result.error);
       }
     } catch (error) {
       setError('Error interno del sistema');
-      notifyError('Error', 'Error interno del sistema');
-    } finally {
-      setIsLoading(false);
     }
   };
 
