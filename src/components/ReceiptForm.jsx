@@ -248,7 +248,6 @@ export default function ReceiptForm({ receiptType }) {
           notifyError('Error al Generar', 'Error al generar el recibo');
         }
       } catch (error) {
-        console.error('Error al descargar recibo:', error);
         notifyError('Error al Descargar', 'Error al descargar el recibo');
       }
     };
@@ -309,71 +308,23 @@ export default function ReceiptForm({ receiptType }) {
           notifyError('Error al Generar', 'Error al generar el recibo');
         }
       } catch (error) {
-        console.error('Error al imprimir recibo:', error);
         notifyError('Error al Imprimir', 'Error al imprimir el recibo');
       }
     };
     
     const handleShare = async () => {
-      try {
-        const result = await generateAndSaveReceipt(form, 'alquiler');
-        if (result.success) {
-          const shareOptions = [
-            {
-              name: 'Email',
-              icon: '📧',
-              action: () => {
-                const subject = encodeURIComponent(`Recibo de Alquiler - Konrad Inversiones`);
-                const body = encodeURIComponent(`Adjunto el recibo de alquiler generado.\n\n${result.receipt.receiptText}`);
-                window.open(`mailto:?subject=${subject}&body=${body}`);
-              }
-            },
-            {
-              name: 'WhatsApp',
-              icon: '📱',
-              action: () => {
-                const text = encodeURIComponent(`Recibo de Alquiler generado por Konrad Inversiones:\n\n${result.receipt.receiptText.substring(0, 500)}...`);
-                window.open(`https://wa.me/?text=${text}`);
-              }
-            },
-            {
-              name: 'Copiar Texto',
-              icon: '📋',
-              action: () => {
-                navigator.clipboard.writeText(result.receipt.receiptText).then(() => {
-                  notifySuccess('Texto Copiado', 'Texto del recibo copiado al portapapeles');
-                }).catch(() => {
-                  const textArea = document.createElement('textarea');
-                  textArea.value = result.receipt.receiptText;
-                  document.body.appendChild(textArea);
-                  textArea.select();
-                  document.execCommand('copy');
-                  document.body.removeChild(textArea);
-                  notifySuccess('Texto Copiado', 'Texto del recibo copiado al portapapeles');
-                });
-              }
-            }
-          ];
-          
-          const option = prompt(
-            'Selecciona una opción para compartir:\n' +
-            shareOptions.map((opt, index) => `${index + 1}. ${opt.icon} ${opt.name}`).join('\n') +
-            '\n\nIngresa el número de la opción:'
-          );
-          
-          const selectedIndex = parseInt(option) - 1;
-          if (selectedIndex >= 0 && selectedIndex < shareOptions.length) {
-            shareOptions[selectedIndex].action();
-          } else if (option !== null) {
-            notifyError('Opción Inválida', 'Opción no válida');
-          }
-        } else {
-          notifyError('Error al Generar', 'Error al generar el recibo');
-        }
-      } catch (error) {
-        console.error('Error al compartir recibo:', error);
-        notifyError('Error al Compartir', 'Error al compartir el recibo');
-      }
+      const receiptText = form.receiptText || '';
+      navigator.clipboard.writeText(receiptText).then(() => {
+        notifySuccess('Texto Copiado', 'Texto del recibo copiado al portapapeles');
+      }).catch(() => {
+        const textArea = document.createElement('textarea');
+        textArea.value = receiptText;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        notifySuccess('Texto Copiado', 'Texto del recibo copiado al portapapeles');
+      });
     };
     return (
       <div className="max-w-3xl mx-auto bg-neutral-900 rounded-xl shadow-lg p-6 mt-8">

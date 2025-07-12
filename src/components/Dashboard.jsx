@@ -61,24 +61,22 @@ export default function Dashboard() {
   const loadDashboardData = async () => {
     setLoading(true);
     try {
-      let fullReport = generateFullReport(period);
-      let kpiData = calculateKPIs();
-      let isEmpty =
+      const fullReport = generateFullReport(period);
+      const kpiData = calculateKPIs();
+      const isEmpty =
         !fullReport ||
         !kpiData ||
         Object.values(kpiData).every((v) => !v || v === 0);
       if (isEmpty) {
         const mock = getMockDashboardData(period);
-        fullReport = mock.report;
-        kpiData = mock.kpis;
+        setReport(mock.report);
+        setKpis(mock.kpis);
         setMocked(true);
       } else {
+        setReport(fullReport);
+        setKpis(kpiData);
         setMocked(false);
       }
-      setReport(fullReport);
-      setKpis(kpiData);
-    } catch (error) {
-      console.error('Error cargando datos del dashboard:', error);
     } finally {
       setLoading(false);
     }

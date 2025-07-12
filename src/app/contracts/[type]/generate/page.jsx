@@ -109,7 +109,6 @@ export default function ContractGeneratePage() {
       // Mostrar notificación de éxito
       notifySuccess('Contrato Generado', 'Contrato generado y guardado en el historial exitosamente');
     } catch (error) {
-      console.error('Error al generar contrato:', error);
       notifyError('Error al Generar', 'Error al generar el contrato');
     } finally {
       setIsGenerating(false);
@@ -175,7 +174,6 @@ export default function ContractGeneratePage() {
       // Mostrar notificación de éxito
               notifySuccess('Contrato Descargado', 'Contrato descargado exitosamente');
       } catch (error) {
-        console.error('Error al descargar:', error);
         notifyError('Error al Descargar', 'Error al descargar el contrato');
       }
   };
@@ -239,87 +237,24 @@ export default function ContractGeneratePage() {
         printWindow.print();
       };
             } catch (error) {
-          console.error('Error al imprimir:', error);
           notifyError('Error al Imprimir', 'Error al imprimir el contrato');
         }
   };
 
   const handleShare = () => {
-    try {
-      const contractText = generateContract(contractData, contractType);
-      const fileName = `Contrato_${contract.name.replace(/\s+/g, '_')}_${formatDate(new Date()).replace(/\//g, '-')}.txt`;
-      
-      // Crear opciones de compartir
-      const shareOptions = [
-        {
-          name: 'Email',
-          icon: '📧',
-          action: () => {
-            const subject = encodeURIComponent(`Contrato ${contract.name} - Konrad Inversiones`);
-            const body = encodeURIComponent(`Adjunto el contrato ${contract.name} generado.\n\n${contractText}`);
-            window.open(`mailto:?subject=${subject}&body=${body}`);
-          }
-        },
-        {
-          name: 'WhatsApp',
-          icon: '📱',
-          action: () => {
-            const text = encodeURIComponent(`Contrato ${contract.name} generado por Konrad Inversiones:\n\n${contractText.substring(0, 500)}...`);
-            window.open(`https://wa.me/?text=${text}`);
-          }
-        },
-        {
-          name: 'Copiar Texto',
-          icon: '📋',
-          action: () => {
-            navigator.clipboard.writeText(contractText).then(() => {
-              notifySuccess('Texto Copiado', 'Texto del contrato copiado al portapapeles');
-            }).catch(() => {
-              // Fallback para navegadores que no soportan clipboard API
-              const textArea = document.createElement('textarea');
-              textArea.value = contractText;
-              document.body.appendChild(textArea);
-              textArea.select();
-              document.execCommand('copy');
-              document.body.removeChild(textArea);
-              notifySuccess('Texto Copiado', 'Texto del contrato copiado al portapapeles');
-            });
-          }
-        },
-        {
-          name: 'Descargar',
-          icon: '💾',
-          action: () => {
-            const blob = new Blob([contractText], { type: 'text/plain;charset=utf-8' });
-            const url = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = fileName;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(url);
-          }
-        }
-      ];
-      
-      // Mostrar menú de opciones
-      const option = prompt(
-        'Selecciona una opción para compartir:\n' +
-        shareOptions.map((opt, index) => `${index + 1}. ${opt.icon} ${opt.name}`).join('\n') +
-        '\n\nIngresa el número de la opción:'
-      );
-      
-      const selectedIndex = parseInt(option) - 1;
-      if (selectedIndex >= 0 && selectedIndex < shareOptions.length) {
-        shareOptions[selectedIndex].action();
-      } else if (option !== null) {
-        notifyError('Opción Inválida', 'Opción no válida');
-      }
-    } catch (error) {
-      console.error('Error al compartir:', error);
-      notifyError('Error al Compartir', 'Error al compartir el contrato');
-    }
+    if (!contractData) return;
+    const contractText = generateContract(contractData, contractType);
+    navigator.clipboard.writeText(contractText).then(() => {
+      notifySuccess('Texto Copiado', 'Texto del contrato copiado al portapapeles');
+    }).catch(() => {
+      const textArea = document.createElement('textarea');
+      textArea.value = contractText;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      notifySuccess('Texto Copiado', 'Texto del contrato copiado al portapapeles');
+    });
   };
 
   const handleTestContract = () => {
