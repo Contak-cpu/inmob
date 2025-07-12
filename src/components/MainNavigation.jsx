@@ -14,7 +14,8 @@ import {
   BarChart3,
   Users,
   LogOut,
-  User
+  User,
+  Bell
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUI } from '@/hooks/useUI';
