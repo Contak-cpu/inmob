@@ -1,4 +1,5 @@
-import React from 'react';
+"use client";
+import React, { useEffect } from 'react';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { initializeNotifications } from '@/utils/notifications';
@@ -22,13 +23,12 @@ export const viewport = {
 };
 
 export default function RootLayout({ children }) {
-  // Inicializar sistemas en el cliente
-  if (typeof window !== 'undefined') {
-    React.useEffect(() => {
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
       initializeNotifications();
       initializeAuth();
-    }, []);
-  }
+    }
+  }, []);
 
   return (
     <html lang="es" className="h-full">

@@ -148,6 +148,15 @@ export const notifyInfo = (title, message) => {
   );
 };
 
+// Notificación de éxito
+export const notifySuccess = (title, message) => {
+  return createNotification(
+    NOTIFICATION_TYPES.SUCCESS,
+    title,
+    message
+  );
+};
+
 // ===== RECORDATORIOS =====
 
 // Crear recordatorio
