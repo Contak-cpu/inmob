@@ -428,3 +428,8 @@ const checkPendingReminders = () => {
 if (typeof window !== 'undefined') {
   window.addEventListener('DOMContentLoaded', initializeNotifications);
 } 
+
+export const getUnreadNotifications = () => {
+  const notifications = getNotifications();
+  return notifications.filter(n => !n.read);
+}; 
