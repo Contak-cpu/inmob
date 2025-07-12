@@ -1,9 +1,7 @@
-"use client";
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import { initializeNotifications } from '@/utils/notifications';
-import { initializeAuth } from '@/utils/auth';
+import ClientInitializer from '@/components/ClientInitializer';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -23,13 +21,6 @@ export const viewport = {
 };
 
 export default function RootLayout({ children }) {
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      initializeNotifications();
-      initializeAuth();
-    }
-  }, []);
-
   return (
     <html lang="es" className="h-full">
       <head>
@@ -42,6 +33,7 @@ export default function RootLayout({ children }) {
       </head>
       <body className={`${inter.className} h-full`}>
         <div className="min-h-screen bg-gradient-to-br from-neutral-900 via-neutral-800 to-neutral-900">
+          <ClientInitializer />
           {children}
         </div>
       </body>
