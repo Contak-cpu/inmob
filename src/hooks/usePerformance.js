@@ -80,106 +80,6 @@ export function usePerformance() {
     }
   }, []);
 
-  // Optimización de re-renders
-  const useOptimizedCallback = useCallback((callback, dependencies) => {
-    return useCallback(callback, dependencies);
-  }, []);
-
-  const useOptimizedMemo = useCallback((factory, dependencies) => {
-    return useMemo(factory, dependencies);
-  }, []);
-
-  // Gestión de estado optimizada
-  const useOptimizedState = useCallback((initialState) => {
-    const [state, setState] = useState(initialState);
-    
-    const setOptimizedState = useCallback((newState) => {
-      if (typeof newState === 'function') {
-        setState(prevState => {
-          const nextState = newState(prevState);
-          return JSON.stringify(prevState) === JSON.stringify(nextState) ? prevState : nextState;
-        });
-      } else {
-        setState(prevState => 
-          JSON.stringify(prevState) === JSON.stringify(newState) ? prevState : newState
-        );
-      }
-    }, []);
-
-    return [state, setOptimizedState];
-  }, []);
-
-  // Cache de datos
-  const useCache = useCallback((key, data, ttl = 5 * 60 * 1000) => {
-    const [cachedData, setCachedData] = useState(null);
-
-    useEffect(() => {
-      const cached = localStorage.getItem(`cache_${key}`);
-      if (cached) {
-        const { data: cachedData, timestamp } = JSON.parse(cached);
-        if (Date.now() - timestamp < ttl) {
-          setCachedData(cachedData);
-          return;
-        }
-      }
-      
-      if (data) {
-        setCachedData(data);
-        localStorage.setItem(`cache_${key}`, JSON.stringify({
-          data,
-          timestamp: Date.now()
-        }));
-      }
-    }, [key, data, ttl]);
-
-    return cachedData;
-  }, []);
-
-  // Monitoreo de rendimiento
-  const usePerformanceMonitor = useCallback(() => {
-    const [metrics, setMetrics] = useState({
-      fps: 0,
-      memory: 0,
-      loadTime: 0
-    });
-
-    useEffect(() => {
-      let frameCount = 0;
-      let lastTime = performance.now();
-      let animationId;
-
-      const measurePerformance = () => {
-        const currentTime = performance.now();
-        frameCount++;
-
-        if (currentTime - lastTime >= 1000) {
-          const fps = Math.round((frameCount * 1000) / (currentTime - lastTime));
-          
-          setMetrics(prev => ({
-            ...prev,
-            fps,
-            memory: performance.memory ? performance.memory.usedJSHeapSize / 1024 / 1024 : 0
-          }));
-
-          frameCount = 0;
-          lastTime = currentTime;
-        }
-
-        animationId = requestAnimationFrame(measurePerformance);
-      };
-
-      measurePerformance();
-
-      return () => {
-        if (animationId) {
-          cancelAnimationFrame(animationId);
-        }
-      };
-    }, []);
-
-    return metrics;
-  }, []);
-
   return {
     // Estado
     isLoading,
@@ -196,13 +96,6 @@ export function usePerformance() {
     lazyLoad,
     optimizeImage,
     prefetchData,
-    
-    // Hooks optimizados
-    useOptimizedCallback,
-    useOptimizedMemo,
-    useOptimizedState,
-    useCache,
-    usePerformanceMonitor,
   };
 }
 
@@ -370,4 +263,101 @@ export function useOptimizedForm(initialData = {}) {
     resetForm,
     handleSubmit
   };
+}
+
+/**
+ * Hook para cache de datos
+ */
+export function useCache(key, data, ttl = 5 * 60 * 1000) {
+  const [cachedData, setCachedData] = useState(null);
+
+  useEffect(() => {
+    const cached = localStorage.getItem(`cache_${key}`);
+    if (cached) {
+      const { data: cachedData, timestamp } = JSON.parse(cached);
+      if (Date.now() - timestamp < ttl) {
+        setCachedData(cachedData);
+        return;
+      }
+    }
+    
+    if (data) {
+      setCachedData(data);
+      localStorage.setItem(`cache_${key}`, JSON.stringify({
+        data,
+        timestamp: Date.now()
+      }));
+    }
+  }, [key, data, ttl]);
+
+  return cachedData;
+}
+
+/**
+ * Hook para monitoreo de rendimiento
+ */
+export function usePerformanceMonitor() {
+  const [metrics, setMetrics] = useState({
+    fps: 0,
+    memory: 0,
+    loadTime: 0
+  });
+
+  useEffect(() => {
+    let frameCount = 0;
+    let lastTime = performance.now();
+    let animationId;
+
+    const measurePerformance = () => {
+      const currentTime = performance.now();
+      frameCount++;
+
+      if (currentTime - lastTime >= 1000) {
+        const fps = Math.round((frameCount * 1000) / (currentTime - lastTime));
+        
+        setMetrics(prev => ({
+          ...prev,
+          fps,
+          memory: performance.memory ? performance.memory.usedJSHeapSize / 1024 / 1024 : 0
+        }));
+
+        frameCount = 0;
+        lastTime = currentTime;
+      }
+
+      animationId = requestAnimationFrame(measurePerformance);
+    };
+
+    measurePerformance();
+
+    return () => {
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+      }
+    };
+  }, []);
+
+  return metrics;
+}
+
+/**
+ * Hook para estado optimizado
+ */
+export function useOptimizedState(initialState) {
+  const [state, setState] = useState(initialState);
+  
+  const setOptimizedState = useCallback((newState) => {
+    if (typeof newState === 'function') {
+      setState(prevState => {
+        const nextState = newState(prevState);
+        return JSON.stringify(prevState) === JSON.stringify(nextState) ? prevState : nextState;
+      });
+    } else {
+      setState(prevState => 
+        JSON.stringify(prevState) === JSON.stringify(newState) ? prevState : newState
+      );
+    }
+  }, []);
+
+  return [state, setOptimizedState];
 } 
