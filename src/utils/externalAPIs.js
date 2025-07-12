@@ -1,451 +1,314 @@
-// Estructura para integración con APIs externas - Preparado para integración futura
+import smartCache from './smartCache.js';
+import realtimeSync from './realtimeSync.js';
 
-// Sistema de logging silencioso en producción
-const logInfo = (message) => {
-  if (process.env.NODE_ENV !== 'production') {
-    console.log(message);
-  }
-};
-
-const logError = (message, error) => {
-  if (process.env.NODE_ENV !== 'production') {
-    console.error(message, error);
-  }
-};
-
-// Configuración de APIs externas
-export const API_CONFIG = {
-  enabled: false, // Cambiar a true cuando se implemente la integración
-  endpoints: {
-    ipc: 'https://api.indec.gob.ar/ipc', // Ejemplo - URL real a definir
-    icl: 'https://api.indec.gob.ar/icl', // Ejemplo - URL real a definir
-    uva: 'https://api.bcra.gob.ar/uva', // Ejemplo - URL real a definir
-  },
-  updateInterval: 24 * 60 * 60 * 1000, // 24 horas
-  cacheDuration: 7 * 24 * 60 * 60 * 1000, // 7 días
-  retryAttempts: 3,
-  retryDelay: 5000, // 5 segundos
-};
-
-// Tipos de índices
-export const INDEX_TYPES = {
-  IPC: 'ipc', // Índice de Precios al Consumidor
-  ICL: 'icl', // Índice de Contratos de Locación
-  UVA: 'uva', // Unidad de Valor Adquisitivo
-  CCL: 'ccl', // Contrato de Locación Comercial
-};
-
-// Estados de actualización
-export const UPDATE_STATUS = {
-  IDLE: 'idle',
-  UPDATING: 'updating',
-  SUCCESS: 'success',
-  ERROR: 'error',
-  CACHE_EXPIRED: 'cache_expired',
-};
-
-// Estado de APIs externas
-const apiState = {
-  status: UPDATE_STATUS.IDLE,
-  lastUpdate: null,
-  cachedData: {},
-  errors: [],
-};
-
-// ===== GESTIÓN DE CACHE =====
-
-// Guardar datos en cache
-const saveToCache = (key, data) => {
-  try {
-    const cacheData = {
-      data,
-      timestamp: new Date().toISOString(),
-      expiresAt: new Date(Date.now() + API_CONFIG.cacheDuration).toISOString(),
+class ExternalAPIManager {
+  constructor() {
+    this.apis = new Map();
+    this.retryConfig = {
+      maxRetries: 3,
+      baseDelay: 1000,
+      maxDelay: 10000
     };
-    
-    localStorage.setItem(`konrad_api_cache_${key}`, JSON.stringify(cacheData));
-    apiState.cachedData[key] = cacheData;
-  } catch (error) {
-    logError('Error al guardar en cache:', error);
+    this.rateLimits = new Map();
+    this.setupDefaultAPIs();
   }
-};
 
-// Obtener datos del cache
-const getFromCache = (key) => {
-  try {
-    const cached = localStorage.getItem(`konrad_api_cache_${key}`);
-    if (cached) {
-      const cacheData = JSON.parse(cached);
-      const now = new Date();
-      const expiresAt = new Date(cacheData.expiresAt);
-      
-      if (now < expiresAt) {
-        apiState.cachedData[key] = cacheData;
-        return cacheData.data;
-      } else {
-        // Cache expirado
-        localStorage.removeItem(`konrad_api_cache_${key}`);
-        delete apiState.cachedData[key];
+  // Configurar APIs por defecto
+  setupDefaultAPIs() {
+    // API de geocodificación
+    this.registerAPI('geocoding', {
+      baseURL: 'https://api.mapbox.com/geocoding/v5/mapbox.places',
+      token: process.env.NEXT_PUBLIC_MAPBOX_TOKEN,
+      rateLimit: { requests: 100, window: 60000 }, // 100 requests por minuto
+      cache: { ttl: 24 * 60 * 60 * 1000, tags: ['geocoding'] } // 24 horas
+    });
+
+    // API de validación de documentos
+    this.registerAPI('documentValidation', {
+      baseURL: 'https://api.validacion.com/v1',
+      token: process.env.NEXT_PUBLIC_VALIDATION_TOKEN,
+      rateLimit: { requests: 50, window: 60000 },
+      cache: { ttl: 60 * 60 * 1000, tags: ['validation'] } // 1 hora
+    });
+
+    // API de notificaciones push
+    this.registerAPI('pushNotifications', {
+      baseURL: 'https://fcm.googleapis.com/fcm/send',
+      token: process.env.NEXT_PUBLIC_FCM_TOKEN,
+      rateLimit: { requests: 1000, window: 60000 },
+      cache: { ttl: 5 * 60 * 1000, tags: ['notifications'] } // 5 minutos
+    });
+
+    // API de conversión de moneda
+    this.registerAPI('currencyConverter', {
+      baseURL: 'https://api.exchangerate-api.com/v4/latest',
+      rateLimit: { requests: 100, window: 60000 },
+      cache: { ttl: 60 * 60 * 1000, tags: ['currency'] } // 1 hora
+    });
+  }
+
+  // Registrar una nueva API
+  registerAPI(name, config) {
+    this.apis.set(name, {
+      ...config,
+      lastRequest: 0,
+      requestCount: 0
+    });
+  }
+
+  // Realizar petición con retry y rate limiting
+  async request(apiName, endpoint, options = {}) {
+    const api = this.apis.get(apiName);
+    if (!api) {
+      throw new Error(`API ${apiName} no registrada`);
+    }
+
+    const {
+      method = 'GET',
+      body,
+      headers = {},
+      useCache = true,
+      cacheKey = null,
+      retry = true
+    } = options;
+
+    // Verificar rate limiting
+    if (this.isRateLimited(apiName)) {
+      throw new Error(`Rate limit excedido para ${apiName}`);
+    }
+
+    // Verificar caché
+    const cacheKeyToUse = cacheKey || `${apiName}_${endpoint}_${JSON.stringify(options)}`;
+    if (useCache) {
+      const cachedData = smartCache.get(cacheKeyToUse);
+      if (cachedData) {
+        return cachedData;
       }
     }
-  } catch (error) {
-    logError('Error al leer cache:', error);
-  }
-  
-  return null;
-};
 
-// Verificar si el cache está expirado
-const isCacheExpired = (key) => {
-  const cached = getFromCache(key);
-  return cached === null;
-};
-
-// ===== FUNCIONES DE API (PREPARADAS PARA IMPLEMENTACIÓN) =====
-
-// Obtener índice IPC
-export const fetchIPC = async (date = null) => {
-  if (!API_CONFIG.enabled) {
-    logInfo('APIs externas deshabilitadas');
-    return null;
-  }
-  
-  const cacheKey = `ipc_${date || 'latest'}`;
-  
-  // Verificar cache primero
-  const cached = getFromCache(cacheKey);
-  if (cached) {
-    return cached;
-  }
-  
-  apiState.status = UPDATE_STATUS.UPDATING;
-  
-  try {
-    // Aquí iría la llamada real a la API
-    logInfo('Obteniendo índice IPC...');
-    
-    // Simular llamada a API
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Datos simulados - reemplazar con datos reales
-    const ipcData = {
-      index: 123.45,
-      date: date || new Date().toISOString().split('T')[0],
-      source: 'INDEC',
-      previousIndex: 122.30,
-      change: 0.94,
-      changePercent: 0.76,
-    };
-    
-    // Guardar en cache
-    saveToCache(cacheKey, ipcData);
-    
-    apiState.status = UPDATE_STATUS.SUCCESS;
-    apiState.lastUpdate = new Date().toISOString();
-    
-    return ipcData;
-    
-  } catch (error) {
-    apiState.status = UPDATE_STATUS.ERROR;
-    apiState.errors.push({
-      type: INDEX_TYPES.IPC,
-      error: error.message,
-      timestamp: new Date().toISOString(),
+    // Realizar petición con retry
+    const response = await this.makeRequestWithRetry(api, endpoint, {
+      method,
+      body,
+      headers,
+      retry
     });
-    
-    logError('Error obteniendo IPC:', error);
-    return null;
-  }
-};
 
-// Obtener índice ICL
-export const fetchICL = async (date = null) => {
-  if (!API_CONFIG.enabled) {
-    logInfo('APIs externas deshabilitadas');
-    return null;
-  }
-  
-  const cacheKey = `icl_${date || 'latest'}`;
-  
-  // Verificar cache primero
-  const cached = getFromCache(cacheKey);
-  if (cached) {
-    return cached;
-  }
-  
-  apiState.status = UPDATE_STATUS.UPDATING;
-  
-  try {
-    // Aquí iría la llamada real a la API
-    logInfo('Obteniendo índice ICL...');
-    
-    // Simular llamada a API
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Datos simulados - reemplazar con datos reales
-    const iclData = {
-      index: 456.78,
-      date: date || new Date().toISOString().split('T')[0],
-      source: 'INDEC',
-      previousIndex: 455.20,
-      change: 1.58,
-      changePercent: 0.35,
-      category: 'locacion_residencial',
-    };
-    
-    // Guardar en cache
-    saveToCache(cacheKey, iclData);
-    
-    apiState.status = UPDATE_STATUS.SUCCESS;
-    apiState.lastUpdate = new Date().toISOString();
-    
-    return iclData;
-    
-  } catch (error) {
-    apiState.status = UPDATE_STATUS.ERROR;
-    apiState.errors.push({
-      type: INDEX_TYPES.ICL,
-      error: error.message,
-      timestamp: new Date().toISOString(),
-    });
-    
-    logError('Error obteniendo ICL:', error);
-    return null;
-  }
-};
+    // Guardar en caché si es exitoso
+    if (useCache && response.ok) {
+      const data = await response.json();
+      smartCache.set(cacheKeyToUse, data, {
+        ttl: api.cache?.ttl || 30 * 60 * 1000,
+        tags: api.cache?.tags || [apiName],
+        priority: 'normal'
+      });
+      return data;
+    }
 
-// Obtener índice UVA
-export const fetchUVA = async (date = null) => {
-  if (!API_CONFIG.enabled) {
-    logInfo('APIs externas deshabilitadas');
-    return null;
+    return response;
   }
-  
-  const cacheKey = `uva_${date || 'latest'}`;
-  
-  // Verificar cache primero
-  const cached = getFromCache(cacheKey);
-  if (cached) {
-    return cached;
-  }
-  
-  apiState.status = UPDATE_STATUS.UPDATING;
-  
-  try {
-    // Aquí iría la llamada real a la API
-    logInfo('Obteniendo índice UVA...');
-    
-    // Simular llamada a API
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Datos simulados - reemplazar con datos reales
-    const uvaData = {
-      index: 789.12,
-      date: date || new Date().toISOString().split('T')[0],
-      source: 'BCRA',
-      previousIndex: 788.50,
-      change: 0.62,
-      changePercent: 0.08,
-    };
-    
-    // Guardar en cache
-    saveToCache(cacheKey, uvaData);
-    
-    apiState.status = UPDATE_STATUS.SUCCESS;
-    apiState.lastUpdate = new Date().toISOString();
-    
-    return uvaData;
-    
-  } catch (error) {
-    apiState.status = UPDATE_STATUS.ERROR;
-    apiState.errors.push({
-      type: INDEX_TYPES.UVA,
-      error: error.message,
-      timestamp: new Date().toISOString(),
-    });
-    
-    logError('Error obteniendo UVA:', error);
-    return null;
-  }
-};
 
-// ===== CÁLCULOS CON ÍNDICES =====
+  // Realizar petición con retry automático
+  async makeRequestWithRetry(api, endpoint, options, attempt = 1) {
+    try {
+      const url = `${api.baseURL}${endpoint}`;
+      const headers = {
+        'Content-Type': 'application/json',
+        ...options.headers
+      };
 
-// Calcular ajuste por IPC
-export const calculateIPCAdjustment = (baseAmount, baseDate, targetDate) => {
-  const baseIPC = fetchIPC(baseDate);
-  const targetIPC = fetchIPC(targetDate);
-  
-  if (!baseIPC || !targetIPC) {
-    return null;
-  }
-  
-  const adjustmentFactor = targetIPC.index / baseIPC.index;
-  const adjustedAmount = baseAmount * adjustmentFactor;
-  
-  return {
-    originalAmount: baseAmount,
-    adjustedAmount,
-    adjustmentFactor,
-    baseIPC: baseIPC.index,
-    targetIPC: targetIPC.index,
-    difference: adjustedAmount - baseAmount,
-    percentageChange: ((adjustmentFactor - 1) * 100),
-  };
-};
-
-// Calcular ajuste por ICL
-export const calculateICLAdjustment = (baseAmount, baseDate, targetDate) => {
-  const baseICL = fetchICL(baseDate);
-  const targetICL = fetchICL(targetDate);
-  
-  if (!baseICL || !targetICL) {
-    return null;
-  }
-  
-  const adjustmentFactor = targetICL.index / baseICL.index;
-  const adjustedAmount = baseAmount * adjustmentFactor;
-  
-  return {
-    originalAmount: baseAmount,
-    adjustedAmount,
-    adjustmentFactor,
-    baseICL: baseICL.index,
-    targetICL: targetICL.index,
-    difference: adjustedAmount - baseAmount,
-    percentageChange: ((adjustmentFactor - 1) * 100),
-  };
-};
-
-// Calcular ajuste por UVA
-export const calculateUVAAdjustment = (baseAmount, baseDate, targetDate) => {
-  const baseUVA = fetchUVA(baseDate);
-  const targetUVA = fetchUVA(targetDate);
-  
-  if (!baseUVA || !targetUVA) {
-    return null;
-  }
-  
-  const adjustmentFactor = targetUVA.index / baseUVA.index;
-  const adjustedAmount = baseAmount * adjustmentFactor;
-  
-  return {
-    originalAmount: baseAmount,
-    adjustedAmount,
-    adjustmentFactor,
-    baseUVA: baseUVA.index,
-    targetUVA: targetUVA.index,
-    difference: adjustedAmount - baseAmount,
-    percentageChange: ((adjustmentFactor - 1) * 100),
-  };
-};
-
-// ===== ACTUALIZACIÓN AUTOMÁTICA =====
-
-// Actualizar todos los índices
-export const updateAllIndices = async () => {
-  if (!API_CONFIG.enabled) {
-    return { success: false, message: 'APIs externas deshabilitadas' };
-  }
-  
-      logInfo('Actualizando índices externos...');
-  
-  const results = {
-    ipc: await fetchIPC(),
-    icl: await fetchICL(),
-    uva: await fetchUVA(),
-  };
-  
-  const successCount = Object.values(results).filter(r => r !== null).length;
-  
-  return {
-    success: successCount > 0,
-    message: `Actualización completada - ${successCount}/3 índices actualizados`,
-    results,
-  };
-};
-
-// Configurar actualización automática
-export const setupAutoUpdate = () => {
-  if (!API_CONFIG.enabled) {
-    return;
-  }
-  
-  // Actualización periódica
-  setInterval(() => {
-    updateAllIndices();
-  }, API_CONFIG.updateInterval);
-  
-  // Verificar cache expirado al iniciar
-  setTimeout(() => {
-    const indices = [INDEX_TYPES.IPC, INDEX_TYPES.ICL, INDEX_TYPES.UVA];
-    indices.forEach(index => {
-      if (isCacheExpired(index)) {
-        logInfo(`Cache expirado para ${index} - Actualizando...`);
-        switch (index) {
-          case INDEX_TYPES.IPC:
-            fetchIPC();
-            break;
-          case INDEX_TYPES.ICL:
-            fetchICL();
-            break;
-          case INDEX_TYPES.UVA:
-            fetchUVA();
-            break;
-        }
+      if (api.token) {
+        headers.Authorization = `Bearer ${api.token}`;
       }
-    });
-  }, 5000);
-};
 
-// ===== UTILIDADES =====
+      const requestOptions = {
+        method: options.method,
+        headers,
+        ...(options.body && { body: JSON.stringify(options.body) })
+      };
 
-// Obtener estado de APIs
-export const getAPIState = () => {
-  return { ...apiState };
-};
+      // Actualizar rate limiting
+      this.updateRateLimit(api.name);
 
-// Limpiar cache
-export const clearCache = () => {
-  try {
-    Object.keys(apiState.cachedData).forEach(key => {
-      localStorage.removeItem(`konrad_api_cache_${key}`);
-    });
-    apiState.cachedData = {};
-    logInfo('Cache de APIs limpiado');
-  } catch (error) {
-          logError('Error al limpiar cache:', error);
+      const response = await fetch(url, requestOptions);
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      return response;
+
+    } catch (error) {
+      if (attempt < this.retryConfig.maxRetries && options.retry) {
+        const delay = this.calculateRetryDelay(attempt);
+        console.log(`Reintentando petición a ${endpoint} en ${delay}ms (intento ${attempt})`);
+        
+        await new Promise(resolve => setTimeout(resolve, delay));
+        return this.makeRequestWithRetry(api, endpoint, options, attempt + 1);
+      }
+      
+      throw error;
+    }
   }
-};
 
-// Obtener historial de errores
-export const getAPIErrors = () => {
-  return [...apiState.errors];
-};
-
-// Limpiar errores
-export const clearAPIErrors = () => {
-  apiState.errors = [];
-};
-
-// ===== INICIALIZACIÓN =====
-
-// Inicializar sistema de APIs externas
-export const initializeExternalAPIs = () => {
-  if (!API_CONFIG.enabled) {
-    logInfo('APIs externas deshabilitadas');
-    return;
+  // Calcular delay para retry
+  calculateRetryDelay(attempt) {
+    const delay = this.retryConfig.baseDelay * Math.pow(2, attempt - 1);
+    return Math.min(delay, this.retryConfig.maxDelay);
   }
-  
-  console.log('Inicializando sistema de APIs externas...');
-  
-  // Configurar actualización automática
-  setupAutoUpdate();
-  
-  console.log('Sistema de APIs externas inicializado');
-};
 
-// Inicializar cuando el DOM esté listo
-if (typeof window !== 'undefined') {
-  window.addEventListener('DOMContentLoaded', initializeExternalAPIs);
-} 
+  // Verificar rate limiting
+  isRateLimited(apiName) {
+    const api = this.apis.get(apiName);
+    if (!api || !api.rateLimit) return false;
+
+    const now = Date.now();
+    const windowStart = now - api.rateLimit.window;
+
+    // Limpiar requests antiguos
+    if (api.lastRequest < windowStart) {
+      api.requestCount = 0;
+    }
+
+    return api.requestCount >= api.rateLimit.requests;
+  }
+
+  // Actualizar rate limiting
+  updateRateLimit(apiName) {
+    const api = this.apis.get(apiName);
+    if (!api) return;
+
+    const now = Date.now();
+    api.lastRequest = now;
+    api.requestCount++;
+  }
+
+  // Geocodificar dirección
+  async geocodeAddress(address) {
+    try {
+      const data = await this.request('geocoding', `/${encodeURIComponent(address)}.json`, {
+        useCache: true,
+        cacheKey: `geocode_${address}`
+      });
+
+      if (data.features && data.features.length > 0) {
+        const feature = data.features[0];
+        return {
+          latitude: feature.center[1],
+          longitude: feature.center[0],
+          address: feature.place_name,
+          confidence: feature.relevance
+        };
+      }
+
+      throw new Error('No se encontró la dirección');
+    } catch (error) {
+      console.error('Error geocodificando dirección:', error);
+      throw error;
+    }
+  }
+
+  // Validar documento
+  async validateDocument(documentType, documentNumber) {
+    try {
+      const data = await this.request('documentValidation', '/validate', {
+        method: 'POST',
+        body: { type: documentType, number: documentNumber },
+        useCache: true,
+        cacheKey: `validation_${documentType}_${documentNumber}`
+      });
+
+      return {
+        isValid: data.valid,
+        details: data.details,
+        confidence: data.confidence
+      };
+    } catch (error) {
+      console.error('Error validando documento:', error);
+      throw error;
+    }
+  }
+
+  // Enviar notificación push
+  async sendPushNotification(token, title, body, data = {}) {
+    try {
+      const message = {
+        to: token,
+        notification: {
+          title,
+          body
+        },
+        data: {
+          ...data,
+          click_action: 'FLUTTER_NOTIFICATION_CLICK'
+        }
+      };
+
+      await this.request('pushNotifications', '', {
+        method: 'POST',
+        body: message,
+        useCache: false
+      });
+
+      return { success: true };
+    } catch (error) {
+      console.error('Error enviando notificación push:', error);
+      throw error;
+    }
+  }
+
+  // Convertir moneda
+  async convertCurrency(from, to, amount) {
+    try {
+      const data = await this.request('currencyConverter', `/${from}`, {
+        useCache: true,
+        cacheKey: `currency_${from}_${to}`
+      });
+
+      const rate = data.rates[to];
+      if (!rate) {
+        throw new Error(`Tasa de cambio no disponible para ${to}`);
+      }
+
+      return {
+        from,
+        to,
+        amount,
+        convertedAmount: amount * rate,
+        rate,
+        date: data.date
+      };
+    } catch (error) {
+      console.error('Error convirtiendo moneda:', error);
+      throw error;
+    }
+  }
+
+  // Obtener estadísticas de uso
+  getUsageStats() {
+    const stats = {};
+    
+    for (const [name, api] of this.apis.entries()) {
+      stats[name] = {
+        requestCount: api.requestCount,
+        lastRequest: api.lastRequest,
+        rateLimit: api.rateLimit
+      };
+    }
+
+    return stats;
+  }
+
+  // Limpiar estadísticas
+  clearStats() {
+    for (const api of this.apis.values()) {
+      api.requestCount = 0;
+      api.lastRequest = 0;
+    }
+  }
+}
+
+// Instancia singleton
+const externalAPIManager = new ExternalAPIManager();
+
+export default externalAPIManager; 

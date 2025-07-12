@@ -14,18 +14,72 @@ import {
   Phone,
   Calendar
 } from 'lucide-react';
-import { getCurrentUser, getAllUsers, hasPermission, USER_ROLES } from '@/utils/auth';
+import { getCurrentUser, getAllUsers, hasPermission, USER_ROLES, createUser, updateUser, deleteUser } from '@/utils/auth';
+import { useNotifications } from '@/hooks/useNotifications';
 import Breadcrumbs from '@/components/Breadcrumbs';
+import UserModal from '@/components/ui/UserModal';
+import { useConfirmDialog } from '@/components/ui/ConfirmDialog';
 
 export default function UsersPage() {
   const [user, setUser] = useState(null);
   const [users, setUsers] = useState([]);
   const [selectedRole, setSelectedRole] = useState('all');
+  const [userModalOpen, setUserModalOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
+  const { showSuccess, showError } = useNotifications();
+  const { showConfirm, ConfirmDialogComponent } = useConfirmDialog();
 
   useEffect(() => {
     setUser(getCurrentUser());
     setUsers(getAllUsers());
   }, []);
+
+  const handleCreateUser = () => {
+    setEditingUser(null);
+    setUserModalOpen(true);
+  };
+
+  const handleEditUser = (userToEdit) => {
+    setEditingUser(userToEdit);
+    setUserModalOpen(true);
+  };
+
+  const handleDeleteUser = (userToDelete) => {
+    showConfirm({
+      title: 'Eliminar Usuario',
+      message: `¿Estás seguro de que quieres eliminar a ${userToDelete.name}? Esta acción no se puede deshacer.`,
+      type: 'danger',
+      onConfirm: () => {
+        try {
+          deleteUser(userToDelete.id);
+          setUsers(getAllUsers());
+          showSuccess('Usuario Eliminado', `${userToDelete.name} ha sido eliminado exitosamente`);
+        } catch (error) {
+          showError('Error al Eliminar', 'No se pudo eliminar el usuario');
+        }
+      }
+    });
+  };
+
+  const handleSaveUser = (userData) => {
+    try {
+      if (userData.id) {
+        // Actualizar usuario existente
+        updateUser(userData.id, userData);
+        showSuccess('Usuario Actualizado', `${userData.name} ha sido actualizado exitosamente`);
+      } else {
+        // Crear nuevo usuario
+        createUser(userData);
+        showSuccess('Usuario Creado', `${userData.name} ha sido creado exitosamente`);
+      }
+      
+      setUsers(getAllUsers());
+      setUserModalOpen(false);
+      setEditingUser(null);
+    } catch (error) {
+      showError('Error al Guardar', 'No se pudo guardar el usuario');
+    }
+  };
 
   const getRoleLabel = (role) => {
     switch (role) {
@@ -140,7 +194,10 @@ export default function UsersPage() {
           </div>
           <div className="flex items-center space-x-3">
             {hasPermission('canManageUsers') && (
-              <button className="btn-primary flex items-center space-x-2">
+              <button 
+                onClick={handleCreateUser}
+                className="btn-primary flex items-center space-x-2"
+              >
                 <UserPlus className="h-4 w-4" />
                 <span>Nuevo Usuario</span>
               </button>
@@ -165,11 +222,25 @@ export default function UsersPage() {
                 </div>
                 <div className={`p-3 rounded-xl ${getColorClasses(stat.color)}`}>
                   <Icon className="h-6 w-6" />
-                </div>
-              </div>
-            </div>
-          );
-        })}
+                        </div>
+      </div>
+
+      {/* Modal de Usuario */}
+      <UserModal
+        isOpen={userModalOpen}
+        onClose={() => {
+          setUserModalOpen(false);
+          setEditingUser(null);
+        }}
+        user={editingUser}
+        onSave={handleSaveUser}
+      />
+
+      {/* Diálogo de Confirmación */}
+      <ConfirmDialogComponent />
+    </div>
+  );
+})}
       </div>
 
       {/* Filtros */}
@@ -223,10 +294,18 @@ export default function UsersPage() {
               <div className="flex items-center space-x-2">
                 {hasPermission('canManageUsers') && (
                   <>
-                    <button className="p-2 hover:bg-neutral-600 rounded-lg transition-colors">
+                    <button 
+                      onClick={() => handleEditUser(userItem)}
+                      className="p-2 hover:bg-neutral-600 rounded-lg transition-colors"
+                      title="Editar usuario"
+                    >
                       <Edit className="h-4 w-4 text-neutral-400" />
                     </button>
-                    <button className="p-2 hover:bg-error-500/10 rounded-lg transition-colors">
+                    <button 
+                      onClick={() => handleDeleteUser(userItem)}
+                      className="p-2 hover:bg-error-500/10 rounded-lg transition-colors"
+                      title="Eliminar usuario"
+                    >
                       <Trash2 className="h-4 w-4 text-error-400" />
                     </button>
                   </>

@@ -1,179 +1,163 @@
 'use client';
 
 import React, { useState } from 'react';
-import { AlertTriangle, AlertCircle, Info, CheckCircle } from 'lucide-react';
-import Modal from './Modal';
-import Button from './Button';
+import { 
+  AlertTriangle, 
+  Trash2, 
+  X, 
+  Check,
+  Info
+} from 'lucide-react';
 
 /**
  * Componente de diálogo de confirmación
- * 
- * @param {Object} props - Props del componente
- * @param {boolean} props.isOpen - Si el diálogo está abierto
- * @param {Function} props.onClose - Función para cerrar el diálogo
- * @param {string} props.title - Título del diálogo
- * @param {string} props.message - Mensaje del diálogo
- * @param {string} props.type - Tipo de confirmación ('warning', 'danger', 'info', 'success')
- * @param {string} props.confirmText - Texto del botón de confirmar
- * @param {string} props.cancelText - Texto del botón de cancelar
- * @param {Function} props.onConfirm - Función llamada al confirmar
- * @param {boolean} props.loading - Si está en estado de carga
- * @param {React.ReactNode} props.children - Contenido adicional
- * @returns {JSX.Element} Componente de confirmación
  */
 export default function ConfirmDialog({
   isOpen,
   onClose,
-  title,
-  message,
-  type = 'warning',
+  onConfirm,
+  title = 'Confirmar Acción',
+  message = '¿Estás seguro de que quieres realizar esta acción?',
+  type = 'warning', // 'warning', 'danger', 'info'
   confirmText = 'Confirmar',
   cancelText = 'Cancelar',
-  onConfirm,
-  loading = false,
-  children
+  icon: Icon = AlertTriangle
 }) {
+  if (!isOpen) return null;
+
   const getTypeConfig = () => {
     switch (type) {
       case 'danger':
         return {
-          icon: AlertTriangle,
           iconColor: 'text-error-400',
           bgColor: 'bg-error-500/20',
-          confirmVariant: 'error'
+          borderColor: 'border-error-500/30',
+          buttonColor: 'bg-error-600 hover:bg-error-700 text-white'
         };
       case 'warning':
         return {
-          icon: AlertCircle,
           iconColor: 'text-warning-400',
           bgColor: 'bg-warning-500/20',
-          confirmVariant: 'warning'
+          borderColor: 'border-warning-500/30',
+          buttonColor: 'bg-warning-600 hover:bg-warning-700 text-white'
         };
       case 'info':
         return {
-          icon: Info,
           iconColor: 'text-info-400',
           bgColor: 'bg-info-500/20',
-          confirmVariant: 'primary'
-        };
-      case 'success':
-        return {
-          icon: CheckCircle,
-          iconColor: 'text-success-400',
-          bgColor: 'bg-success-500/20',
-          confirmVariant: 'success'
+          borderColor: 'border-info-500/30',
+          buttonColor: 'bg-info-600 hover:bg-info-700 text-white'
         };
       default:
         return {
-          icon: AlertCircle,
-          iconColor: 'text-warning-400',
-          bgColor: 'bg-warning-500/20',
-          confirmVariant: 'warning'
+          iconColor: 'text-primary-400',
+          bgColor: 'bg-primary-500/20',
+          borderColor: 'border-primary-500/30',
+          buttonColor: 'bg-primary-600 hover:bg-primary-700 text-white'
         };
     }
   };
 
   const config = getTypeConfig();
-  const Icon = config.icon;
 
   const handleConfirm = () => {
-    onConfirm?.();
+    onConfirm();
     onClose();
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      size="sm"
-      showCloseButton={false}
-    >
-      <div className="text-center">
-        {/* Icono */}
-        <div className={`mx-auto flex items-center justify-center h-12 w-12 rounded-full ${config.bgColor} mb-4`}>
-          <Icon className={`h-6 w-6 ${config.iconColor}`} />
-        </div>
-
-        {/* Título */}
-        {title && (
-          <h3 className="text-lg font-medium text-white mb-2">
-            {title}
-          </h3>
-        )}
-
-        {/* Mensaje */}
-        {message && (
-          <p className="text-sm text-neutral-300 mb-6">
-            {message}
-          </p>
-        )}
-
-        {/* Contenido adicional */}
-        {children && (
-          <div className="mb-6">
-            {children}
+    <div className="fixed inset-0 z-50 overflow-y-auto">
+      {/* Backdrop */}
+      <div 
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+        onClick={onClose}
+      />
+      
+      {/* Dialog */}
+      <div className="flex min-h-full items-center justify-center p-4">
+        <div className="relative w-full max-w-md bg-neutral-800 border border-neutral-700 rounded-xl shadow-xl">
+          {/* Header */}
+          <div className="flex items-center justify-between p-4 border-b border-neutral-700">
+            <div className="flex items-center space-x-3">
+              <div className={`p-2 rounded-lg ${config.bgColor}`}>
+                <Icon className={`h-5 w-5 ${config.iconColor}`} />
+              </div>
+              <h3 className="text-lg font-semibold text-white">{title}</h3>
+            </div>
+            <button
+              onClick={onClose}
+              className="p-1 hover:bg-neutral-700 rounded-lg transition-colors"
+            >
+              <X className="h-5 w-5 text-neutral-400" />
+            </button>
           </div>
-        )}
 
-        {/* Botones */}
-        <div className="flex items-center justify-center space-x-3">
-          <Button
-            variant="ghost"
-            onClick={onClose}
-            disabled={loading}
-          >
-            {cancelText}
-          </Button>
-          <Button
-            variant={config.confirmVariant}
-            onClick={handleConfirm}
-            loading={loading}
-          >
-            {confirmText}
-          </Button>
+          {/* Content */}
+          <div className="p-4">
+            <p className="text-neutral-300">{message}</p>
+          </div>
+
+          {/* Footer */}
+          <div className="flex items-center justify-end space-x-3 p-4 border-t border-neutral-700">
+            <button
+              onClick={onClose}
+              className="btn-secondary"
+            >
+              {cancelText}
+            </button>
+            <button
+              onClick={handleConfirm}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${config.buttonColor}`}
+            >
+              {confirmText}
+            </button>
+          </div>
         </div>
       </div>
-    </Modal>
+    </div>
   );
 }
 
 /**
- * Hook para manejar confirmaciones
+ * Hook para usar el diálogo de confirmación
  */
-export function useConfirm() {
-  const [confirmState, setConfirmState] = useState({
+export function useConfirmDialog() {
+  const [dialogState, setDialogState] = useState({
     isOpen: false,
     title: '',
     message: '',
     type: 'warning',
-    onConfirm: null,
-    confirmText: 'Confirmar',
-    cancelText: 'Cancelar'
+    onConfirm: () => {}
   });
 
-  const confirm = (options) => {
-    return new Promise((resolve) => {
-      setConfirmState({
-        isOpen: true,
-        onConfirm: () => resolve(true),
-        ...options
-      });
+  const showConfirm = (options) => {
+    setDialogState({
+      isOpen: true,
+      title: options.title || 'Confirmar Acción',
+      message: options.message || '¿Estás seguro?',
+      type: options.type || 'warning',
+      onConfirm: options.onConfirm || (() => {})
     });
   };
 
-  const closeConfirm = () => {
-    setConfirmState(prev => ({ ...prev, isOpen: false }));
+  const hideConfirm = () => {
+    setDialogState(prev => ({ ...prev, isOpen: false }));
   };
 
   const ConfirmDialogComponent = () => (
     <ConfirmDialog
-      {...confirmState}
-      onClose={closeConfirm}
+      isOpen={dialogState.isOpen}
+      onClose={hideConfirm}
+      onConfirm={dialogState.onConfirm}
+      title={dialogState.title}
+      message={dialogState.message}
+      type={dialogState.type}
     />
   );
 
   return {
-    confirm,
+    showConfirm,
+    hideConfirm,
     ConfirmDialogComponent
   };
 } 

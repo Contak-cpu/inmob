@@ -11,14 +11,23 @@ import {
   Activity,
   Users,
   FileText,
-  Receipt
+  Receipt,
+  Download
 } from 'lucide-react';
 import { getCurrentUser } from '@/utils/auth';
+import { getRealStats, getRevenueData, getTopProperties, getDocumentDistribution, getRecentActivity } from '@/utils/analytics';
 import Breadcrumbs from '@/components/Breadcrumbs';
+import ExportModal from '@/components/ui/ExportModal';
 
 export default function AnalyticsPage() {
   const [user, setUser] = useState(null);
   const [selectedPeriod, setSelectedPeriod] = useState('month');
+  const [stats, setStats] = useState({});
+  const [revenueData, setRevenueData] = useState([]);
+  const [topProperties, setTopProperties] = useState([]);
+  const [documentDistribution, setDocumentDistribution] = useState([]);
+  const [recentActivity, setRecentActivity] = useState([]);
+  const [exportModalOpen, setExportModalOpen] = useState(false);
 
   useEffect(() => {
     setUser(getCurrentUser());
@@ -31,38 +40,16 @@ export default function AnalyticsPage() {
     { value: 'year', label: 'Este año' }
   ];
 
-  const revenueData = [
-    { month: 'Ene', contracts: 12, receipts: 45, total: 12500 },
-    { month: 'Feb', contracts: 15, receipts: 52, total: 13800 },
-    { month: 'Mar', contracts: 18, receipts: 48, total: 14200 },
-    { month: 'Abr', contracts: 22, receipts: 61, total: 15800 },
-    { month: 'May', contracts: 24, receipts: 58, total: 16200 },
-    { month: 'Jun', contracts: 28, receipts: 65, total: 17500 }
-  ];
-
-  const topProperties = [
-    {
-      name: 'Av. San Martín 123',
-      type: 'Locación',
-      revenue: 8500,
-      contracts: 3,
-      trend: 'up'
-    },
-    {
-      name: 'Belgrano 456',
-      type: 'Comercial',
-      revenue: 7200,
-      contracts: 2,
-      trend: 'up'
-    },
-    {
-      name: 'Rivadavia 789',
-      type: 'Locación',
-      revenue: 6800,
-      contracts: 2,
-      trend: 'down'
-    }
-  ];
+  useEffect(() => {
+    setUser(getCurrentUser());
+    
+    // Cargar datos reales
+    setStats(getRealStats());
+    setRevenueData(getRevenueData());
+    setTopProperties(getTopProperties());
+    setDocumentDistribution(getDocumentDistribution());
+    setRecentActivity(getRecentActivity());
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -88,6 +75,13 @@ export default function AnalyticsPage() {
                 </option>
               ))}
             </select>
+            <button
+              onClick={() => setExportModalOpen(true)}
+              className="btn-primary flex items-center space-x-2"
+            >
+              <Download className="h-4 w-4" />
+              <span>Exportar</span>
+            </button>
             <div className="p-3 bg-primary-500/20 rounded-xl">
               <BarChart3 className="h-6 w-6 text-primary-400" />
             </div>
@@ -101,10 +95,16 @@ export default function AnalyticsPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-neutral-400">Ingresos Totales</p>
-              <p className="text-2xl font-bold text-white">$89,800</p>
+              <p className="text-2xl font-bold text-white">{stats.totalRevenue || '$0'}</p>
               <div className="flex items-center space-x-1 mt-1">
-                <TrendingUp className="h-4 w-4 text-success-400" />
-                <span className="text-xs text-success-400">+15.2%</span>
+                {stats.receiptsGrowth >= 0 ? (
+                  <TrendingUp className="h-4 w-4 text-success-400" />
+                ) : (
+                  <TrendingDown className="h-4 w-4 text-error-400" />
+                )}
+                <span className={`text-xs ${stats.receiptsGrowth >= 0 ? 'text-success-400' : 'text-error-400'}`}>
+                  {stats.receiptsGrowth >= 0 ? '+' : ''}{stats.receiptsGrowth || 0}%
+                </span>
               </div>
             </div>
             <div className="p-3 bg-success-500/20 rounded-xl">
@@ -117,10 +117,16 @@ export default function AnalyticsPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-neutral-400">Contratos Activos</p>
-              <p className="text-2xl font-bold text-white">24</p>
+              <p className="text-2xl font-bold text-white">{stats.activeContracts || 0}</p>
               <div className="flex items-center space-x-1 mt-1">
-                <TrendingUp className="h-4 w-4 text-success-400" />
-                <span className="text-xs text-success-400">+8.5%</span>
+                {stats.contractsGrowth >= 0 ? (
+                  <TrendingUp className="h-4 w-4 text-success-400" />
+                ) : (
+                  <TrendingDown className="h-4 w-4 text-error-400" />
+                )}
+                <span className={`text-xs ${stats.contractsGrowth >= 0 ? 'text-success-400' : 'text-error-400'}`}>
+                  {stats.contractsGrowth >= 0 ? '+' : ''}{stats.contractsGrowth || 0}%
+                </span>
               </div>
             </div>
             <div className="p-3 bg-primary-500/20 rounded-xl">
@@ -133,10 +139,16 @@ export default function AnalyticsPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-neutral-400">Recibos Generados</p>
-              <p className="text-2xl font-bold text-white">156</p>
+              <p className="text-2xl font-bold text-white">{stats.totalReceipts || 0}</p>
               <div className="flex items-center space-x-1 mt-1">
-                <TrendingUp className="h-4 w-4 text-success-400" />
-                <span className="text-xs text-success-400">+12.3%</span>
+                {stats.receiptsGrowth >= 0 ? (
+                  <TrendingUp className="h-4 w-4 text-success-400" />
+                ) : (
+                  <TrendingDown className="h-4 w-4 text-error-400" />
+                )}
+                <span className={`text-xs ${stats.receiptsGrowth >= 0 ? 'text-success-400' : 'text-error-400'}`}>
+                  {stats.receiptsGrowth >= 0 ? '+' : ''}{stats.receiptsGrowth || 0}%
+                </span>
               </div>
             </div>
             <div className="p-3 bg-warning-500/20 rounded-xl">
@@ -149,10 +161,16 @@ export default function AnalyticsPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-neutral-400">Clientes Activos</p>
-              <p className="text-2xl font-bold text-white">89</p>
+              <p className="text-2xl font-bold text-white">{stats.totalUsers || 0}</p>
               <div className="flex items-center space-x-1 mt-1">
-                <TrendingDown className="h-4 w-4 text-error-400" />
-                <span className="text-xs text-error-400">-2.1%</span>
+                {stats.usersGrowth >= 0 ? (
+                  <TrendingUp className="h-4 w-4 text-success-400" />
+                ) : (
+                  <TrendingDown className="h-4 w-4 text-error-400" />
+                )}
+                <span className={`text-xs ${stats.usersGrowth >= 0 ? 'text-success-400' : 'text-error-400'}`}>
+                  {stats.usersGrowth >= 0 ? '+' : ''}{stats.usersGrowth || 0}%
+                </span>
               </div>
             </div>
             <div className="p-3 bg-info-500/20 rounded-xl">
@@ -171,18 +189,24 @@ export default function AnalyticsPage() {
             <TrendingUp className="h-5 w-5 text-neutral-400" />
           </div>
           <div className="space-y-3">
-            {revenueData.map((data, index) => (
-              <div key={index} className="flex items-center justify-between p-3 bg-neutral-700/30 rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <span className="text-sm font-medium text-white">{data.month}</span>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-xs text-neutral-400">{data.contracts} contratos</span>
-                    <span className="text-xs text-neutral-400">{data.receipts} recibos</span>
+            {revenueData.length > 0 ? (
+              revenueData.map((data, index) => (
+                <div key={index} className="flex items-center justify-between p-3 bg-neutral-700/30 rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <span className="text-sm font-medium text-white">{data.month}</span>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-xs text-neutral-400">{data.contracts} contratos</span>
+                      <span className="text-xs text-neutral-400">{data.receipts} recibos</span>
+                    </div>
                   </div>
+                  <span className="text-sm font-medium text-white">${data.total.toLocaleString()}</span>
                 </div>
-                <span className="text-sm font-medium text-white">${data.total.toLocaleString()}</span>
+              ))
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-neutral-400">No hay datos de ingresos disponibles</p>
               </div>
-            ))}
+            )}
           </div>
         </div>
 
@@ -193,22 +217,28 @@ export default function AnalyticsPage() {
             <Activity className="h-5 w-5 text-neutral-400" />
           </div>
           <div className="space-y-3">
-            {topProperties.map((property, index) => (
-              <div key={index} className="flex items-center justify-between p-3 bg-neutral-700/30 rounded-lg">
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-white">{property.name}</p>
-                  <p className="text-xs text-neutral-400">{property.type} • {property.contracts} contratos</p>
+            {topProperties.length > 0 ? (
+              topProperties.map((property, index) => (
+                <div key={index} className="flex items-center justify-between p-3 bg-neutral-700/30 rounded-lg">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-white">{property.name}</p>
+                    <p className="text-xs text-neutral-400">{property.type} • {property.contracts} contratos</p>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-sm font-medium text-white">${property.revenue.toLocaleString()}</span>
+                    {property.trend === 'up' ? (
+                      <TrendingUp className="h-4 w-4 text-success-400" />
+                    ) : (
+                      <TrendingDown className="h-4 w-4 text-error-400" />
+                    )}
+                  </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm font-medium text-white">${property.revenue.toLocaleString()}</span>
-                  {property.trend === 'up' ? (
-                    <TrendingUp className="h-4 w-4 text-success-400" />
-                  ) : (
-                    <TrendingDown className="h-4 w-4 text-error-400" />
-                  )}
-                </div>
+              ))
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-neutral-400">No hay propiedades registradas</p>
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>
@@ -221,27 +251,25 @@ export default function AnalyticsPage() {
             <PieChart className="h-5 w-5 text-neutral-400" />
           </div>
           <div className="space-y-3">
-            <div className="flex items-center justify-between p-3 bg-primary-500/10 rounded-lg">
-              <div className="flex items-center space-x-3">
-                <div className="w-3 h-3 bg-primary-400 rounded-full"></div>
-                <span className="text-sm text-white">Contratos de Locación</span>
+            {documentDistribution.length > 0 ? (
+              documentDistribution.map((item, index) => (
+                <div key={index} className={`flex items-center justify-between p-3 ${
+                  index === 0 ? 'bg-primary-500/10' : 'bg-success-500/10'
+                } rounded-lg`}>
+                  <div className="flex items-center space-x-3">
+                    <div className={`w-3 h-3 rounded-full ${
+                      index === 0 ? 'bg-primary-400' : 'bg-success-400'
+                    }`}></div>
+                    <span className="text-sm text-white">{item.type}</span>
+                  </div>
+                  <span className="text-sm font-medium text-white">{item.percentage}%</span>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-neutral-400">No hay documentos registrados</p>
               </div>
-              <span className="text-sm font-medium text-white">65%</span>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-success-500/10 rounded-lg">
-              <div className="flex items-center space-x-3">
-                <div className="w-3 h-3 bg-success-400 rounded-full"></div>
-                <span className="text-sm text-white">Contratos Comerciales</span>
-              </div>
-              <span className="text-sm font-medium text-white">25%</span>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-warning-500/10 rounded-lg">
-              <div className="flex items-center space-x-3">
-                <div className="w-3 h-3 bg-warning-400 rounded-full"></div>
-                <span className="text-sm text-white">Otros Servicios</span>
-              </div>
-              <span className="text-sm font-medium text-white">10%</span>
-            </div>
+            )}
           </div>
         </div>
 
@@ -275,6 +303,13 @@ export default function AnalyticsPage() {
           </div>
         </div>
       </div>
+
+      {/* Modal de Exportación */}
+      <ExportModal
+        isOpen={exportModalOpen}
+        onClose={() => setExportModalOpen(false)}
+        dataType="stats"
+      />
     </div>
   );
 } 

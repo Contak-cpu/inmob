@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Home, Download, Printer, Share2, FileText, ArrowLeft, Receipt, Wrench } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { generateAndSaveReceipt } from '@/utils/receiptGenerator';
+import { generateReceiptPDF } from '@/utils/pdfGenerator';
 import { formatDate } from '@/utils/formatters';
 import { notifySuccess, notifyError } from '@/utils/notifications';
 import Breadcrumbs from '@/components/Breadcrumbs';
@@ -194,61 +195,17 @@ export default function ReceiptForm({ receiptType }) {
     
     const handleDownload = async () => {
       try {
-        const result = await generateAndSaveReceipt(form, 'alquiler');
+        // Generar PDF del recibo
+        const result = await generateReceiptPDF(form, 'alquiler');
+        
         if (result.success) {
-          const fileName = `Recibo_Alquiler_${form.tenantName?.replace(/\s+/g, '_')}_${formatDate(new Date()).replace(/\//g, '-')}.txt`;
-          
-          // Crear contenido HTML para descarga
-          const htmlContent = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-              <meta charset="utf-8">
-              <title>Recibo de Alquiler</title>
-              <style>
-                body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
-                .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }
-                .content { margin-bottom: 30px; }
-                .signature-section { margin-top: 40px; border-top: 1px solid #ccc; padding-top: 20px; }
-                .signature-line { border-bottom: 1px solid #000; display: inline-block; width: 200px; margin: 0 20px; }
-                .company-info { text-align: center; margin-top: 40px; font-size: 12px; color: #666; }
-              </style>
-            </head>
-            <body>
-              <div class="header">
-                <h1>RECIBO DE ALQUILER</h1>
-                <p>Konrad Inversiones + Desarrollos Inmobiliarios</p>
-              </div>
-              <div class="content">
-                ${result.receipt.receiptText.replace(/\n/g, '<br>')}
-              </div>
-              <div class="signature-section">
-                <p>Firma: <span class="signature-line"></span></p>
-              </div>
-              <div class="company-info">
-                <p>Konrad Inversiones + Desarrollos Inmobiliarios</p>
-                <p>Mat. 12345</p>
-              </div>
-            </body>
-            </html>
-          `;
-          
-          const blob = new Blob([htmlContent], { type: 'text/html' });
-          const url = window.URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href = url;
-          link.download = fileName;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          window.URL.revokeObjectURL(url);
-          
-          notifySuccess('Recibo Descargado', 'Recibo descargado y guardado en el historial exitosamente');
+          notifySuccess('PDF Generado', `Recibo descargado como ${result.filename}`);
         } else {
-          notifyError('Error al Generar', 'Error al generar el recibo');
+          notifyError('Error al Generar PDF', result.error || 'Error al generar el PDF');
         }
       } catch (error) {
-        notifyError('Error al Descargar', 'Error al descargar el recibo');
+        console.error('Error generando PDF:', error);
+        notifyError('Error al Generar PDF', 'Error al generar el PDF del recibo');
       }
     };
     
@@ -457,10 +414,10 @@ export default function ReceiptForm({ receiptType }) {
         </div>
         {/* Acciones */}
         <div className="flex justify-center space-x-4">
-          <button onClick={handleDownload} className="btn-primary flex items-center space-x-2">
-            <Download className="h-4 w-4" />
-            <span>Descargar</span>
-          </button>
+                      <button onClick={handleDownload} className="btn-primary flex items-center space-x-2">
+              <Download className="h-4 w-4" />
+              <span>Descargar PDF</span>
+            </button>
           <button onClick={handlePrint} className="btn-primary flex items-center space-x-2">
             <Printer className="h-4 w-4" />
             <span>Imprimir</span>

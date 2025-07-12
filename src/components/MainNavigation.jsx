@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { 
@@ -16,14 +16,29 @@ import {
   LogOut,
   User,
   Bell,
-  LayoutDashboard
+  LayoutDashboard,
+  Settings,
+  Search,
+  HelpCircle
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUI } from '@/hooks/useUI';
+import { useNotifications } from '@/hooks/useNotifications';
+import { useTheme } from '@/contexts/ThemeContext';
+import { useSystemShortcuts } from '@/hooks/useKeyboardShortcuts';
 import LoadingScreen from './LoadingScreen';
+import NotificationModal from '@/components/ui/NotificationModal';
+import ThemeSettings from '@/components/ui/ThemeSettings';
+import GlobalSearch from '@/components/ui/GlobalSearch';
+import { KeyboardShortcutsHelp } from '@/hooks/useKeyboardShortcuts';
 
 export default function MainNavigation({ children }) {
   const pathname = usePathname();
+  const [notificationModalOpen, setNotificationModalOpen] = useState(false);
+  const [themeSettingsOpen, setThemeSettingsOpen] = useState(false);
+  const [globalSearchOpen, setGlobalSearchOpen] = useState(false);
+  const [helpModalOpen, setHelpModalOpen] = useState(false);
+  
   const { 
     user, 
     isLoading, 
@@ -38,6 +53,18 @@ export default function MainNavigation({ children }) {
     toggleSidebar, 
     closeSidebar 
   } = useUI();
+
+  const {
+    notifications,
+    unreadCount: unreadNotificationsCount,
+    markNotificationAsRead,
+    clearNotifications
+  } = useNotifications();
+
+  const { currentTheme } = useTheme();
+
+  // Activar atajos de teclado del sistema
+  useSystemShortcuts();
 
   // Cerrar sidebar en móviles al cambiar de ruta
   useEffect(() => {
@@ -248,10 +275,43 @@ export default function MainNavigation({ children }) {
 
             {/* Acciones del header */}
             <div className="flex items-center space-x-3">
+              {/* Búsqueda global */}
+              <button 
+                onClick={() => setGlobalSearchOpen(true)}
+                className="p-2 hover:bg-neutral-700/50 rounded-lg transition-colors"
+                title="Búsqueda global (Ctrl+K)"
+              >
+                <Search className="h-5 w-5 text-neutral-400" />
+              </button>
+
+              {/* Configuración de tema */}
+              <button 
+                onClick={() => setThemeSettingsOpen(true)}
+                className="p-2 hover:bg-neutral-700/50 rounded-lg transition-colors"
+                title="Configuración"
+              >
+                <Settings className="h-5 w-5 text-neutral-400" />
+              </button>
+
+              {/* Ayuda */}
+              <button 
+                onClick={() => setHelpModalOpen(true)}
+                className="p-2 hover:bg-neutral-700/50 rounded-lg transition-colors"
+                title="Ayuda (Ctrl+/)"
+              >
+                <HelpCircle className="h-5 w-5 text-neutral-400" />
+              </button>
+
               {/* Notificaciones */}
-              <button className="p-2 hover:bg-neutral-700/50 rounded-lg relative">
+              <button 
+                onClick={() => setNotificationModalOpen(true)}
+                className="p-2 hover:bg-neutral-700/50 rounded-lg relative transition-colors"
+                title="Ver notificaciones"
+              >
                 <Bell className="h-5 w-5 text-neutral-400" />
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-error-400 rounded-full"></div>
+                {unreadNotificationsCount > 0 && (
+                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-error-400 rounded-full animate-pulse"></div>
+                )}
               </button>
 
               {/* Estadísticas (Header) */}
@@ -284,6 +344,33 @@ export default function MainNavigation({ children }) {
           {children}
         </main>
       </div>
+
+      {/* Modal de Notificaciones */}
+      <NotificationModal
+        isOpen={notificationModalOpen}
+        onClose={() => setNotificationModalOpen(false)}
+        notifications={notifications}
+        onMarkAsRead={markNotificationAsRead}
+        onClearAll={clearNotifications}
+      />
+
+      {/* Modal de Configuración de Temas */}
+      <ThemeSettings
+        isOpen={themeSettingsOpen}
+        onClose={() => setThemeSettingsOpen(false)}
+      />
+
+      {/* Búsqueda Global */}
+      <GlobalSearch
+        isOpen={globalSearchOpen}
+        onClose={() => setGlobalSearchOpen(false)}
+      />
+
+      {/* Modal de Ayuda */}
+      <KeyboardShortcutsHelp
+        isOpen={helpModalOpen}
+        onClose={() => setHelpModalOpen(false)}
+      />
     </div>
   );
 } 

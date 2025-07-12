@@ -10,7 +10,10 @@ import {
   Calendar,
   BarChart3,
   PieChart,
-  Activity
+  Activity,
+  TestTube,
+  Zap,
+  Eye
 } from 'lucide-react';
 import { getCurrentUser } from '@/utils/auth';
 import Breadcrumbs from '@/components/Breadcrumbs';
@@ -18,6 +21,7 @@ import StatsCard from '@/components/ui/StatsCard';
 import { useNotifications } from '@/hooks/useNotifications';
 import Button from '@/components/ui/Button';
 import Link from 'next/link';
+import TestingOptimizationPanel from '@/components/TestingOptimizationPanel';
 
 export default function DashboardPage() {
   const [user, setUser] = useState(null);
@@ -29,11 +33,26 @@ export default function DashboardPage() {
 
   // Función para probar las notificaciones
   const testNotifications = () => {
-    showSuccess('Éxito', 'Operación completada correctamente');
-    setTimeout(() => showError('Error', 'Algo salió mal'), 1000);
-    setTimeout(() => showWarning('Advertencia', 'Revisa los datos ingresados'), 2000);
-    setTimeout(() => showInfo('Información', 'Nuevas actualizaciones disponibles'), 3000);
+    showSuccess('Sistema Funcional', 'Todas las funcionalidades están operativas');
+    setTimeout(() => showInfo('Actualización', 'Nuevas características disponibles'), 1000);
+    setTimeout(() => showWarning('Recordatorio', 'Revisa los contratos próximos a vencer'), 2000);
+    setTimeout(() => showError('Error Simulado', 'Esta es una notificación de prueba'), 3000);
   };
+
+  // Generar notificaciones reales del sistema
+  useEffect(() => {
+    if (user) {
+      // Notificación de bienvenida
+      setTimeout(() => {
+        showSuccess('Bienvenido', `Hola ${user.name}, el sistema está listo para usar`);
+      }, 1000);
+
+      // Notificación de estadísticas
+      setTimeout(() => {
+        showInfo('Estadísticas Actualizadas', 'Los datos del dashboard están actualizados');
+      }, 3000);
+    }
+  }, [user, showSuccess, showInfo]);
 
   const stats = [
     {
@@ -113,12 +132,18 @@ export default function DashboardPage() {
               variant="outline"
               size="sm"
               onClick={testNotifications}
+              title="Generar notificaciones de prueba"
             >
-              Probar Notificaciones
+              Probar Sistema
             </Button>
             <Link href="/analytics" title="Ver Estadísticas">
               <div className="p-3 bg-primary-500/20 rounded-xl cursor-pointer hover:bg-primary-500/40 transition-colors">
                 <BarChart3 className="h-6 w-6 text-primary-400" />
+              </div>
+            </Link>
+            <Link href="/security" title="Configuración de Seguridad">
+              <div className="p-3 bg-warning-500/20 rounded-xl cursor-pointer hover:bg-warning-500/40 transition-colors">
+                <Eye className="h-6 w-6 text-warning-400" />
               </div>
             </Link>
           </div>
@@ -247,6 +272,19 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Panel de Testing y Optimización */}
+      <div className="card">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-white">Testing y Optimización</h3>
+          <div className="flex items-center space-x-2">
+            <TestTube className="h-5 w-5 text-blue-400" />
+            <Zap className="h-5 w-5 text-yellow-400" />
+            <Eye className="h-5 w-5 text-green-400" />
+          </div>
+        </div>
+        <TestingOptimizationPanel />
       </div>
     </div>
   );
