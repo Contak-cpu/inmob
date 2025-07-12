@@ -15,7 +15,8 @@ import {
   Users,
   LogOut,
   User,
-  Bell
+  Bell,
+  LayoutDashboard
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUI } from '@/hooks/useUI';
@@ -54,7 +55,7 @@ export default function MainNavigation({ children }) {
     {
       name: 'Dashboard',
       href: '/dashboard',
-      icon: Dashboard,
+      icon: LayoutDashboard,
       permission: 'canViewDashboard',
       description: 'Análisis y reportes'
     },
