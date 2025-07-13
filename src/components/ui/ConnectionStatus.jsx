@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Wifi, WifiOff, RefreshCw, CheckCircle, AlertCircle, Clock } from 'lucide-react';
 
 const ConnectionStatus = () => {
@@ -9,6 +9,8 @@ const ConnectionStatus = () => {
   const [lastSync, setLastSync] = useState(null);
   const [syncStatus, setSyncStatus] = useState('idle'); // idle, syncing, success, error
   const [showDetails, setShowDetails] = useState(false);
+  const [popoverDirection, setPopoverDirection] = useState('down'); // 'down' o 'up'
+  const buttonRef = useRef(null);
 
   useEffect(() => {
     // Escuchar cambios de estado de conexión
@@ -56,6 +58,21 @@ const ConnectionStatus = () => {
       window.removeEventListener('offlineSyncComplete', handleSyncComplete);
     };
   }, []);
+
+  // Detectar si hay espacio abajo o arriba para el popover
+  useEffect(() => {
+    if (showDetails && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      const popoverHeight = 320; // Altura estimada del popover
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceAbove = rect.top;
+      if (spaceBelow < popoverHeight && spaceAbove > popoverHeight) {
+        setPopoverDirection('up');
+      } else {
+        setPopoverDirection('down');
+      }
+    }
+  }, [showDetails]);
 
   const getStatusIcon = () => {
     if (!isOnline) {
@@ -119,6 +136,7 @@ const ConnectionStatus = () => {
   return (
     <div className="relative">
       <button
+        ref={buttonRef}
         onClick={() => setShowDetails(!showDetails)}
         className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
       >
@@ -134,7 +152,10 @@ const ConnectionStatus = () => {
       </button>
 
       {showDetails && (
-        <div className="absolute top-full right-0 mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-50">
+        <div
+          className={`absolute right-0 w-80 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-50 animate-fade-in ${popoverDirection === 'up' ? 'bottom-full mb-2' : 'top-full mt-2'}`}
+          style={{ minWidth: 260 }}
+        >
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium text-gray-700">Estado de conexión</span>

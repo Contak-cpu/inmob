@@ -71,6 +71,19 @@ export default function MainNavigation({ children }) {
     closeSidebar();
   }, [pathname, closeSidebar]);
 
+  // Prevenir scroll del body cuando el sidebar móvil está abierto
+  useEffect(() => {
+    if (sidebarOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [sidebarOpen]);
+
   const handleLogout = async () => {
     const result = await logout();
     if (result.success) {
@@ -146,46 +159,91 @@ export default function MainNavigation({ children }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-neutral-900 via-neutral-800 to-neutral-900">
-      {/* Sidebar para móviles */}
-      <div className={`fixed inset-0 z-50 lg:hidden ${sidebarOpen ? 'block' : 'hidden'}`}>
-        <div className="fixed inset-0 bg-black/50" onClick={closeSidebar} />
-        <div className="fixed left-0 top-0 h-full w-64 bg-neutral-800 border-r border-neutral-700">
-          <div className="flex items-center justify-between p-4 border-b border-neutral-700">
-            <div className="flex items-center space-x-2">
-              <Building className="h-6 w-6 text-primary-400" />
-              <span className="text-white font-semibold">Konrad</span>
+      {/* Sidebar para móviles - Mejorado */}
+      <div className={`fixed inset-0 z-50 lg:hidden transition-opacity duration-300 ${
+        sidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+      }`}>
+        {/* Overlay con backdrop blur */}
+        <div 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm" 
+          onClick={closeSidebar}
+        />
+        
+        {/* Sidebar móvil con animación */}
+        <div className={`fixed left-0 top-0 h-full w-80 max-w-[85vw] bg-neutral-800/95 backdrop-blur-md border-r border-neutral-700/50 transform transition-transform duration-300 ease-out ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}>
+          {/* Header del sidebar móvil */}
+          <div className="flex items-center justify-between p-6 border-b border-neutral-700/50">
+            <div className="flex items-center space-x-3">
+              <Building className="h-8 w-8 text-primary-400" />
+              <div>
+                <h1 className="text-xl font-bold text-white">Konrad</h1>
+                <p className="text-xs text-neutral-400">Inmobiliaria</p>
+              </div>
             </div>
             <button
               onClick={closeSidebar}
-              className="p-1 hover:bg-neutral-700 rounded-lg"
+              className="p-3 hover:bg-neutral-700/50 rounded-xl transition-colors touch-manipulation"
             >
-              <X className="h-5 w-5 text-neutral-400" />
+              <X className="h-6 w-6 text-neutral-400" />
             </button>
           </div>
           
-          {/* Navegación móvil */}
-          <nav className="p-4 space-y-2">
+          {/* Navegación móvil mejorada */}
+          <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
             {filteredNavigation.map((item) => {
               const Icon = item.icon;
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex items-center space-x-3 p-3 rounded-lg transition-colors ${
+                  className={`flex items-center space-x-4 p-4 rounded-xl transition-all duration-200 touch-manipulation ${
                     isActiveRoute(item.href)
-                      ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30'
-                      : 'text-neutral-300 hover:bg-neutral-700/50 hover:text-white'
+                      ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30 shadow-lg'
+                      : 'text-neutral-300 hover:bg-neutral-700/50 hover:text-white active:scale-95'
                   }`}
+                  onClick={closeSidebar}
                 >
-                  <Icon className="h-5 w-5" />
-                  <div>
-                    <div className="font-medium">{item.name}</div>
-                    <div className="text-xs text-neutral-400">{item.description}</div>
+                  <div className={`p-3 rounded-xl ${
+                    isActiveRoute(item.href) 
+                      ? 'bg-primary-500/20' 
+                      : 'bg-neutral-700/50'
+                  }`}>
+                    <Icon className="h-6 w-6" />
                   </div>
+                  <div className="flex-1">
+                    <div className="font-semibold text-base">{item.name}</div>
+                    <div className="text-sm text-neutral-400">{item.description}</div>
+                  </div>
+                  {isActiveRoute(item.href) && (
+                    <ChevronRight className="h-5 w-5 text-primary-400" />
+                  )}
                 </Link>
               );
             })}
           </nav>
+
+          {/* Perfil de usuario móvil */}
+          <div className="p-4 border-t border-neutral-700/50">
+            <div className="flex items-center space-x-4 p-4 bg-neutral-700/30 rounded-xl">
+              <div className="w-12 h-12 bg-primary-500 rounded-full flex items-center justify-center">
+                <User className="h-6 w-6 text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-base font-semibold text-white truncate">{user?.name}</p>
+                <p className="text-sm text-neutral-400">{getUserRole()}</p>
+              </div>
+            </div>
+            
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center justify-center space-x-3 p-4 mt-3 text-error-400 hover:bg-error-500/10 rounded-xl transition-colors touch-manipulation"
+            >
+              <LogOut className="h-5 w-5" />
+              <span className="text-base font-medium">Cerrar Sesión</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -253,33 +311,40 @@ export default function MainNavigation({ children }) {
 
       {/* Contenido principal */}
       <div className="lg:pl-64">
-        {/* Header */}
-        <header className="glass-effect border-b border-neutral-700/50">
+        {/* Header mejorado para móviles */}
+        <header className="glass-effect border-b border-neutral-700/50 sticky top-0 z-40">
           <div className="flex items-center justify-between px-4 sm:px-6 py-4">
             <div className="flex items-center space-x-4">
+              {/* Botón hamburguesa mejorado */}
               <button
                 onClick={toggleSidebar}
-                className="lg:hidden p-2 hover:bg-neutral-700/50 rounded-lg"
+                className="lg:hidden p-3 hover:bg-neutral-700/50 rounded-xl transition-colors touch-manipulation"
+                aria-label="Abrir menú"
               >
-                <Menu className="h-5 w-5 text-neutral-400" />
+                <Menu className="h-6 w-6 text-neutral-400" />
               </button>
               
-              <div className="flex items-center space-x-2">
-                <Building className="h-6 w-6 text-primary-400" />
+              {/* Logo y título */}
+              <div className="flex items-center space-x-3">
+                <Building className="h-7 w-7 text-primary-400" />
                 <div className="hidden sm:block">
                   <h1 className="text-lg font-bold text-white">Konrad Inmobiliaria</h1>
                   <p className="text-xs text-neutral-400">Sistema de Gestión</p>
                 </div>
+                <div className="sm:hidden">
+                  <h1 className="text-base font-bold text-white">Konrad</h1>
+                </div>
               </div>
             </div>
 
-            {/* Acciones del header */}
-            <div className="flex items-center space-x-3">
+            {/* Acciones del header - Mejoradas para móviles */}
+            <div className="flex items-center space-x-2 sm:space-x-3">
               {/* Búsqueda global */}
               <button 
                 onClick={() => setGlobalSearchOpen(true)}
-                className="p-2 hover:bg-neutral-700/50 rounded-lg transition-colors"
+                className="p-3 hover:bg-neutral-700/50 rounded-xl transition-colors touch-manipulation"
                 title="Búsqueda global (Ctrl+K)"
+                aria-label="Búsqueda global"
               >
                 <Search className="h-5 w-5 text-neutral-400" />
               </button>
@@ -287,8 +352,9 @@ export default function MainNavigation({ children }) {
               {/* Configuración de tema */}
               <button 
                 onClick={() => setThemeSettingsOpen(true)}
-                className="p-2 hover:bg-neutral-700/50 rounded-lg transition-colors"
+                className="p-3 hover:bg-neutral-700/50 rounded-xl transition-colors touch-manipulation"
                 title="Configuración"
+                aria-label="Configuración"
               >
                 <Settings className="h-5 w-5 text-neutral-400" />
               </button>
@@ -296,8 +362,9 @@ export default function MainNavigation({ children }) {
               {/* Ayuda */}
               <button 
                 onClick={() => setHelpModalOpen(true)}
-                className="p-2 hover:bg-neutral-700/50 rounded-lg transition-colors"
+                className="hidden sm:block p-3 hover:bg-neutral-700/50 rounded-xl transition-colors touch-manipulation"
                 title="Ayuda (Ctrl+/)"
+                aria-label="Ayuda"
               >
                 <HelpCircle className="h-5 w-5 text-neutral-400" />
               </button>
@@ -305,32 +372,38 @@ export default function MainNavigation({ children }) {
               {/* Notificaciones */}
               <button 
                 onClick={() => setNotificationModalOpen(true)}
-                className="p-2 hover:bg-neutral-700/50 rounded-lg relative transition-colors"
+                className="p-3 hover:bg-neutral-700/50 rounded-xl relative transition-colors touch-manipulation"
                 title="Ver notificaciones"
+                aria-label="Notificaciones"
               >
                 <Bell className="h-5 w-5 text-neutral-400" />
                 {unreadNotificationsCount > 0 && (
-                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-error-400 rounded-full animate-pulse"></div>
+                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-error-400 rounded-full animate-pulse flex items-center justify-center">
+                    <span className="text-xs text-white font-bold">
+                      {unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount}
+                    </span>
+                  </div>
                 )}
               </button>
 
               {/* Estadísticas (Header) */}
               <Link
                 href="/analytics"
-                className="p-2 hover:bg-neutral-700/50 rounded-lg relative"
+                className="p-3 hover:bg-neutral-700/50 rounded-xl relative transition-colors touch-manipulation"
                 title="Ver Estadísticas"
+                aria-label="Estadísticas"
               >
                 <BarChart3 className="h-5 w-5 text-neutral-400" />
               </Link>
 
-              {/* Perfil móvil */}
+              {/* Perfil móvil mejorado */}
               <div className="lg:hidden">
-                <div className="flex items-center space-x-2 p-2 hover:bg-neutral-700/50 rounded-lg">
+                <div className="flex items-center space-x-3 p-3 hover:bg-neutral-700/50 rounded-xl transition-colors touch-manipulation">
                   <div className="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center">
                     <User className="h-4 w-4 text-white" />
                   </div>
                   <div className="hidden sm:block text-left">
-                    <p className="text-sm font-medium text-white">{user?.name}</p>
+                    <p className="text-sm font-medium text-white truncate max-w-[100px]">{user?.name}</p>
                     <p className="text-xs text-neutral-400">{getUserRole()}</p>
                   </div>
                 </div>
@@ -339,8 +412,8 @@ export default function MainNavigation({ children }) {
           </div>
         </header>
 
-        {/* Contenido */}
-        <main className="p-4 sm:p-6">
+        {/* Contenido principal con mejor padding para móviles */}
+        <main className="p-3 sm:p-4 lg:p-6 min-h-[calc(100vh-80px)]">
           {children}
         </main>
       </div>

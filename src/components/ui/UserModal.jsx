@@ -62,6 +62,25 @@ export default function UserModal({
     setErrors({});
   }, [user, isOpen]);
 
+  // Bloquear scroll del body cuando el modal está abierto
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
+  // Cerrar modal con click fuera
+  const handleBackdropClick = (e) => {
+    if (e.target.classList.contains('modal-overlay')) {
+      onClose();
+    }
+  };
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({
@@ -155,194 +174,182 @@ export default function UserModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      {/* Backdrop */}
-      <div 
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={onClose}
-      />
-      
-      {/* Modal */}
-      <div className="flex min-h-full items-center justify-center p-4">
-        <div className="relative w-full max-w-md bg-neutral-800 border border-neutral-700 rounded-xl shadow-xl">
-          {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-neutral-700">
-            <div className="flex items-center space-x-3">
-              <User className="h-5 w-5 text-primary-400" />
-              <h3 className="text-lg font-semibold text-white">
-                {isEditing ? 'Editar Usuario' : 'Nuevo Usuario'}
-              </h3>
-            </div>
-            <button
-              onClick={onClose}
-              className="p-1 hover:bg-neutral-700 rounded-lg transition-colors"
-            >
-              <X className="h-5 w-5 text-neutral-400" />
-            </button>
+    <div className="modal-overlay" onClick={handleBackdropClick}>
+      <div className="modal-content relative w-full max-w-md sm:max-w-lg bg-neutral-800 border border-neutral-700 rounded-2xl shadow-2xl mx-auto my-8 p-4 sm:p-8 animate-fade-in">
+        {/* Header */}
+        <div className="flex items-center justify-between pb-4 border-b border-neutral-700">
+          <div className="flex items-center space-x-3">
+            <User className="h-5 w-5 text-primary-400" />
+            <h3 className="text-lg font-semibold text-white">
+              {isEditing ? 'Editar Usuario' : 'Nuevo Usuario'}
+            </h3>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-2 hover:bg-neutral-700 rounded-xl transition-colors touch-manipulation"
+            aria-label="Cerrar"
+          >
+            <X className="h-5 w-5 text-neutral-400" />
+          </button>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="pt-4 space-y-4">
+          {/* Nombre */}
+          <div>
+            <label className="block text-sm font-medium text-neutral-300 mb-1">
+              Nombre Completo *
+            </label>
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              className={`input-field ${errors.name ? 'input-field-error' : ''}`}
+              placeholder="Ingrese el nombre completo"
+              autoFocus
+            />
+            {errors.name && (
+              <p className="text-error-400 text-xs mt-1">{errors.name}</p>
+            )}
           </div>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="p-4 space-y-4">
-            {/* Nombre */}
-            <div>
-              <label className="block text-sm font-medium text-neutral-300 mb-1">
-                Nombre Completo *
-              </label>
+          {/* Email */}
+          <div>
+            <label className="block text-sm font-medium text-neutral-300 mb-1">
+              Email *
+            </label>
+            <div className="relative">
+              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-neutral-400" />
               <input
-                type="text"
-                name="name"
-                value={formData.name}
+                type="email"
+                name="email"
+                value={formData.email}
                 onChange={handleChange}
-                className={`input-field ${errors.name ? 'input-field-error' : ''}`}
-                placeholder="Ingrese el nombre completo"
+                className={`input-field pl-10 ${errors.email ? 'input-field-error' : ''}`}
+                placeholder="usuario@ejemplo.com"
               />
-              {errors.name && (
-                <p className="text-error-400 text-xs mt-1">{errors.name}</p>
-              )}
             </div>
+            {errors.email && (
+              <p className="text-error-400 text-xs mt-1">{errors.email}</p>
+            )}
+          </div>
 
-            {/* Email */}
-            <div>
-              <label className="block text-sm font-medium text-neutral-300 mb-1">
-                Email *
-              </label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-neutral-400" />
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className={`input-field pl-10 ${errors.email ? 'input-field-error' : ''}`}
-                  placeholder="usuario@ejemplo.com"
-                />
-              </div>
-              {errors.email && (
-                <p className="text-error-400 text-xs mt-1">{errors.email}</p>
-              )}
-            </div>
+          {/* Username */}
+          <div>
+            <label className="block text-sm font-medium text-neutral-300 mb-1">
+              Nombre de Usuario *
+            </label>
+            <input
+              type="text"
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
+              className={`input-field ${errors.username ? 'input-field-error' : ''}`}
+              placeholder="usuario"
+            />
+            {errors.username && (
+              <p className="text-error-400 text-xs mt-1">{errors.username}</p>
+            )}
+          </div>
 
-            {/* Username */}
-            <div>
-              <label className="block text-sm font-medium text-neutral-300 mb-1">
-                Nombre de Usuario *
-              </label>
+          {/* Contraseña */}
+          <div>
+            <label className="block text-sm font-medium text-neutral-300 mb-1">
+              Contraseña {isEditing ? '(dejar vacío para mantener)' : '*'}
+            </label>
+            <div className="relative">
               <input
-                type="text"
-                name="username"
-                value={formData.username}
+                type={showPassword ? 'text' : 'password'}
+                name="password"
+                value={formData.password}
                 onChange={handleChange}
-                className={`input-field ${errors.username ? 'input-field-error' : ''}`}
-                placeholder="usuario"
+                className={`input-field pr-10 ${errors.password ? 'input-field-error' : ''}`}
+                placeholder="••••••••"
               />
-              {errors.username && (
-                <p className="text-error-400 text-xs mt-1">{errors.username}</p>
-              )}
-            </div>
-
-            {/* Contraseña */}
-            <div>
-              <label className="block text-sm font-medium text-neutral-300 mb-1">
-                Contraseña {isEditing ? '(dejar vacío para mantener)' : '*'}
-              </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className={`input-field pr-10 ${errors.password ? 'input-field-error' : ''}`}
-                  placeholder={isEditing ? 'Nueva contraseña' : 'Contraseña'}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-neutral-400 hover:text-neutral-300"
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
-              {errors.password && (
-                <p className="text-error-400 text-xs mt-1">{errors.password}</p>
-              )}
-            </div>
-
-            {/* Teléfono */}
-            <div>
-              <label className="block text-sm font-medium text-neutral-300 mb-1">
-                Teléfono
-              </label>
-              <div className="relative">
-                <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-neutral-400" />
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  className="input-field pl-10"
-                  placeholder="+54 11 1234-5678"
-                />
-              </div>
-            </div>
-
-            {/* Rol */}
-            <div>
-              <label className="block text-sm font-medium text-neutral-300 mb-1">
-                Rol *
-              </label>
-              <select
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-                className="input-field"
-              >
-                <option value={USER_ROLES.ADMIN}>
-                  {getRoleIcon(USER_ROLES.ADMIN)} Administrador
-                </option>
-                <option value={USER_ROLES.MANAGER}>
-                  {getRoleIcon(USER_ROLES.MANAGER)} Gerente
-                </option>
-                <option value={USER_ROLES.AGENT}>
-                  {getRoleIcon(USER_ROLES.AGENT)} Agente
-                </option>
-                <option value={USER_ROLES.VIEWER}>
-                  {getRoleIcon(USER_ROLES.VIEWER)} Visualizador
-                </option>
-              </select>
-            </div>
-
-            {/* Estado activo */}
-            <div className="flex items-center space-x-3">
-              <input
-                type="checkbox"
-                name="active"
-                checked={formData.active}
-                onChange={handleChange}
-                className="w-4 h-4 text-primary-600 bg-neutral-700 border-neutral-600 rounded focus:ring-primary-500 focus:ring-2"
-              />
-              <label className="text-sm text-neutral-300">
-                Usuario activo
-              </label>
-            </div>
-
-            {/* Footer */}
-            <div className="flex items-center justify-end space-x-3 pt-4 border-t border-neutral-700">
               <button
                 type="button"
-                onClick={onClose}
-                className="btn-secondary"
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-neutral-400 hover:text-primary-400"
+                onClick={() => setShowPassword((v) => !v)}
+                tabIndex={-1}
+                aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
               >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                className="btn-primary"
-              >
-                {isEditing ? 'Actualizar' : 'Crear'} Usuario
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
-          </form>
-        </div>
+            {errors.password && (
+              <p className="text-error-400 text-xs mt-1">{errors.password}</p>
+            )}
+          </div>
+
+          {/* Rol */}
+          <div>
+            <label className="block text-sm font-medium text-neutral-300 mb-1">
+              Rol *
+            </label>
+            <select
+              name="role"
+              value={formData.role}
+              onChange={handleChange}
+              className="input-field"
+            >
+              <option value={USER_ROLES.ADMIN}>Administrador</option>
+              <option value={USER_ROLES.MANAGER}>Gerente</option>
+              <option value={USER_ROLES.AGENT}>Agente</option>
+              <option value={USER_ROLES.VIEWER}>Visualizador</option>
+            </select>
+          </div>
+
+          {/* Teléfono */}
+          <div>
+            <label className="block text-sm font-medium text-neutral-300 mb-1">
+              Teléfono
+            </label>
+            <div className="relative">
+              <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-neutral-400" />
+              <input
+                type="tel"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                className="input-field pl-10"
+                placeholder="Ej: +54 11 1234-5678"
+              />
+            </div>
+          </div>
+
+          {/* Activo */}
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              name="active"
+              checked={formData.active}
+              onChange={handleChange}
+              id="active-user-checkbox"
+              className="form-checkbox h-4 w-4 text-primary-600"
+            />
+            <label htmlFor="active-user-checkbox" className="text-sm text-neutral-300">
+              Usuario activo
+            </label>
+          </div>
+
+          {/* Botones */}
+          <div className="flex flex-col sm:flex-row gap-3 pt-4">
+            <button
+              type="submit"
+              className="btn-primary flex-1 py-4 sm:py-3 text-base font-semibold touch-manipulation"
+            >
+              {isEditing ? 'Guardar Cambios' : 'Crear Usuario'}
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="btn-secondary py-4 sm:py-3 text-base font-semibold touch-manipulation"
+            >
+              Cancelar
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

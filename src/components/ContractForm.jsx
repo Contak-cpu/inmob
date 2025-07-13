@@ -43,16 +43,16 @@ export default function ContractForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
+    <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
       {/* Property Information */}
-      <div className="space-y-6">
-        <div className="flex items-center space-x-3 mb-6">
-          <Building className="h-6 w-6 text-primary-400" />
-          <h3 className="text-xl font-semibold text-white">Información de la Propiedad</h3>
+      <div className="space-y-4 sm:space-y-6">
+        <div className="flex items-center space-x-3 mb-4 sm:mb-6">
+          <Building className="h-5 w-5 sm:h-6 sm:w-6 text-primary-400" />
+          <h3 className="text-lg sm:text-xl font-semibold text-white">Información de la Propiedad</h3>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
-          <div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+          <div className="sm:col-span-2">
             <label className="block text-sm font-medium text-neutral-300 mb-2">
               Dirección de la Propiedad *
             </label>
@@ -118,14 +118,14 @@ export default function ContractForm({
       </div>
 
       {/* Owner Information */}
-      <div className="space-y-6">
-        <div className="flex items-center space-x-3 mb-6">
-          <User className="h-6 w-6 text-primary-400" />
-          <h3 className="text-xl font-semibold text-white">Información del Propietario</h3>
+      <div className="space-y-4 sm:space-y-6">
+        <div className="flex items-center space-x-3 mb-4 sm:mb-6">
+          <User className="h-5 w-5 sm:h-6 sm:w-6 text-primary-400" />
+          <h3 className="text-lg sm:text-xl font-semibold text-white">Información del Propietario</h3>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
-          <div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+          <div className="sm:col-span-2">
             <label className="block text-sm font-medium text-neutral-300 mb-2">
               Nombre Completo *
             </label>
@@ -170,7 +170,7 @@ export default function ContractForm({
             />
           </div>
 
-          <div>
+          <div className="sm:col-span-2">
             <label className="block text-sm font-medium text-neutral-300 mb-2">
               Email
             </label>
@@ -186,14 +186,14 @@ export default function ContractForm({
       </div>
 
       {/* Tenant Information */}
-      <div className="space-y-6">
-        <div className="flex items-center space-x-3 mb-6">
-          <User className="h-6 w-6 text-secondary-400" />
-          <h3 className="text-xl font-semibold text-white">Información del Inquilino</h3>
+      <div className="space-y-4 sm:space-y-6">
+        <div className="flex items-center space-x-3 mb-4 sm:mb-6">
+          <User className="h-5 w-5 sm:h-6 sm:w-6 text-secondary-400" />
+          <h3 className="text-lg sm:text-xl font-semibold text-white">Información del Inquilino</h3>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
-          <div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+          <div className="sm:col-span-2">
             <label className="block text-sm font-medium text-neutral-300 mb-2">
               Nombre Completo *
             </label>
@@ -238,7 +238,7 @@ export default function ContractForm({
             />
           </div>
 
-          <div>
+          <div className="sm:col-span-2">
             <label className="block text-sm font-medium text-neutral-300 mb-2">
               Email
             </label>
@@ -254,13 +254,13 @@ export default function ContractForm({
       </div>
 
       {/* Contract Terms */}
-      <div className="space-y-6">
-        <div className="flex items-center space-x-3 mb-6">
-          <FileText className="h-6 w-6 text-primary-400" />
-          <h3 className="text-xl font-semibold text-white">Términos del Contrato</h3>
+      <div className="space-y-4 sm:space-y-6">
+        <div className="flex items-center space-x-3 mb-4 sm:mb-6">
+          <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-primary-400" />
+          <h3 className="text-lg sm:text-xl font-semibold text-white">Términos del Contrato</h3>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           <div>
             <label className="block text-sm font-medium text-neutral-300 mb-2">
               Fecha de Inicio *
@@ -332,7 +332,7 @@ export default function ContractForm({
             )}
           </div>
 
-          <div>
+          <div className="sm:col-span-2">
             <label className="block text-sm font-medium text-neutral-300 mb-2">
               Tipo de Ajuste *
             </label>
@@ -350,9 +350,9 @@ export default function ContractForm({
               <p className="text-error-400 text-sm mt-1">{errors.adjustmentType}</p>
             )}
             {contract?.adjustmentType && !localFormData.adjustmentType && (
-              <div className="mt-2 p-3 bg-primary-400/10 border border-primary-400/20 rounded-lg">
-                <div className="flex items-start space-x-2">
-                  <div className="text-primary-400 mt-0.5">💡</div>
+              <div className="mt-3 p-3 sm:p-4 bg-primary-400/10 border border-primary-400/20 rounded-lg">
+                <div className="flex items-start space-x-3">
+                  <div className="text-primary-400 mt-0.5 text-lg">💡</div>
                   <div>
                     <p className="text-primary-400 text-sm font-medium mb-1">
                       Sugerencia para este tipo de contrato:
@@ -369,14 +369,14 @@ export default function ContractForm({
       </div>
 
       {/* Guarantors Information */}
-      <div className="space-y-6">
-        <div className="flex items-center space-x-3 mb-6">
-          <User className="h-6 w-6 text-primary-400" />
-          <h3 className="text-xl font-semibold text-white">Información de Garantes</h3>
+      <div className="space-y-4 sm:space-y-6">
+        <div className="flex items-center space-x-3 mb-4 sm:mb-6">
+          <User className="h-5 w-5 sm:h-6 sm:w-6 text-primary-400" />
+          <h3 className="text-lg sm:text-xl font-semibold text-white">Información de Garantes</h3>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
-          <div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+          <div className="sm:col-span-2">
             <label className="block text-sm font-medium text-neutral-300 mb-2">
               Nombre del Garante 1
             </label>
@@ -415,7 +415,7 @@ export default function ContractForm({
             />
           </div>
 
-          <div>
+          <div className="sm:col-span-2">
             <label className="block text-sm font-medium text-neutral-300 mb-2">
               Email del Garante 1
             </label>
@@ -428,7 +428,7 @@ export default function ContractForm({
             />
           </div>
 
-          <div>
+          <div className="sm:col-span-2">
             <label className="block text-sm font-medium text-neutral-300 mb-2">
               Nombre del Garante 2
             </label>
@@ -467,7 +467,7 @@ export default function ContractForm({
             />
           </div>
 
-          <div>
+          <div className="sm:col-span-2">
             <label className="block text-sm font-medium text-neutral-300 mb-2">
               Email del Garante 2
             </label>
@@ -539,23 +539,21 @@ export default function ContractForm({
       </div>
 
       {/* Submit Button */}
-      <div className="flex justify-end pt-6 border-t border-neutral-700">
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-6">
         <button
           type="submit"
-          disabled={!isValid || isSubmitting}
-          className={`btn-primary ${!isValid || isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+          disabled={isSubmitting || !isValid}
+          className="btn-primary flex-1 py-4 sm:py-3 text-base font-semibold touch-manipulation"
         >
-          {isSubmitting ? (
-            <div className="flex items-center space-x-2">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-              <span>Generando...</span>
-            </div>
-          ) : (
-            <div className="flex items-center space-x-2">
-              <FileText className="h-4 w-4" />
-              <span>Generar Contrato</span>
-            </div>
-          )}
+          {isSubmitting ? 'Generando Contrato...' : 'Generar Contrato'}
+        </button>
+        
+        <button
+          type="button"
+          onClick={() => window.history.back()}
+          className="btn-secondary py-4 sm:py-3 text-base font-semibold touch-manipulation"
+        >
+          Cancelar
         </button>
       </div>
     </form>
