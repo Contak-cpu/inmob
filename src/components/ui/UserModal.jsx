@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   X, 
   User, 
@@ -34,6 +34,7 @@ export default function UserModal({
   });
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
+  const firstInputRef = useRef(null);
 
   const isEditing = !!user;
 
@@ -66,6 +67,10 @@ export default function UserModal({
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
+      // Enfocar el primer input al abrir
+      setTimeout(() => {
+        if (firstInputRef.current) firstInputRef.current.focus();
+      }, 100);
     } else {
       document.body.style.overflow = '';
     }
@@ -174,10 +179,10 @@ export default function UserModal({
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={handleBackdropClick}>
-      <div className="modal-content relative w-full max-w-md sm:max-w-lg bg-neutral-800 border border-neutral-700 rounded-2xl shadow-2xl mx-auto my-8 p-4 sm:p-8 animate-fade-in">
+    <div className="modal-overlay fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm animate-fade-in transition-opacity duration-300" onClick={handleBackdropClick}>
+      <div className="modal-content relative w-full max-w-xl bg-neutral-800 border border-neutral-700 rounded-2xl shadow-2xl mx-auto my-8 p-4 sm:p-8 animate-slide-up transition-transform duration-300 overflow-y-auto max-h-[90vh]" style={{ minHeight: 'auto' }}>
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-neutral-700">
+        <div className="flex items-center justify-between pb-6 border-b border-neutral-700">
           <div className="flex items-center space-x-3">
             <User className="h-5 w-5 text-primary-400" />
             <h3 className="text-lg font-semibold text-white">
@@ -194,104 +199,88 @@ export default function UserModal({
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="pt-4 space-y-4">
+        <form onSubmit={handleSubmit} className="pt-6 space-y-6">
           {/* Nombre */}
           <div>
-            <label className="block text-sm font-medium text-neutral-300 mb-1">
-              Nombre Completo *
-            </label>
+            <label className="block text-sm font-medium text-neutral-300 mb-1" htmlFor="name">Nombre *</label>
             <input
-              type="text"
+              ref={firstInputRef}
+              id="name"
               name="name"
+              type="text"
               value={formData.name}
               onChange={handleChange}
-              className={`input-field ${errors.name ? 'input-field-error' : ''}`}
-              placeholder="Ingrese el nombre completo"
-              autoFocus
+              className={`input-field w-full ${errors.name ? 'border-error-500' : ''}`}
+              placeholder="Ej: Juan Pérez"
+              autoComplete="off"
             />
-            {errors.name && (
-              <p className="text-error-400 text-xs mt-1">{errors.name}</p>
-            )}
+            {errors.name && <p className="text-error-400 text-xs mt-1">{errors.name}</p>}
           </div>
-
           {/* Email */}
           <div>
-            <label className="block text-sm font-medium text-neutral-300 mb-1">
-              Email *
-            </label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-neutral-400" />
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                className={`input-field pl-10 ${errors.email ? 'input-field-error' : ''}`}
-                placeholder="usuario@ejemplo.com"
-              />
-            </div>
-            {errors.email && (
-              <p className="text-error-400 text-xs mt-1">{errors.email}</p>
-            )}
-          </div>
-
-          {/* Username */}
-          <div>
-            <label className="block text-sm font-medium text-neutral-300 mb-1">
-              Nombre de Usuario *
-            </label>
+            <label className="block text-sm font-medium text-neutral-300 mb-1" htmlFor="email">Email *</label>
             <input
-              type="text"
+              id="email"
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+              className={`input-field w-full ${errors.email ? 'border-error-500' : ''}`}
+              placeholder="usuario@ejemplo.com"
+              autoComplete="off"
+            />
+            {errors.email && <p className="text-error-400 text-xs mt-1">{errors.email}</p>}
+          </div>
+          {/* Nombre de usuario */}
+          <div>
+            <label className="block text-sm font-medium text-neutral-300 mb-1" htmlFor="username">Nombre de Usuario *</label>
+            <input
+              id="username"
               name="username"
+              type="text"
               value={formData.username}
               onChange={handleChange}
-              className={`input-field ${errors.username ? 'input-field-error' : ''}`}
+              className={`input-field w-full ${errors.username ? 'border-error-500' : ''}`}
               placeholder="usuario"
+              autoComplete="off"
             />
-            {errors.username && (
-              <p className="text-error-400 text-xs mt-1">{errors.username}</p>
-            )}
+            {errors.username && <p className="text-error-400 text-xs mt-1">{errors.username}</p>}
           </div>
-
           {/* Contraseña */}
           <div>
-            <label className="block text-sm font-medium text-neutral-300 mb-1">
-              Contraseña {isEditing ? '(dejar vacío para mantener)' : '*'}
-            </label>
+            <label className="block text-sm font-medium text-neutral-300 mb-1" htmlFor="password">Contraseña {isEditing ? '(dejar en blanco para no cambiar)' : '*'} </label>
             <div className="relative">
               <input
-                type={showPassword ? 'text' : 'password'}
+                id="password"
                 name="password"
+                type={showPassword ? 'text' : 'password'}
                 value={formData.password}
                 onChange={handleChange}
-                className={`input-field pr-10 ${errors.password ? 'input-field-error' : ''}`}
-                placeholder="••••••••"
+                className={`input-field w-full pr-10 ${errors.password ? 'border-error-500' : ''}`}
+                placeholder="******"
+                autoComplete="new-password"
               />
               <button
                 type="button"
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-neutral-400 hover:text-primary-400"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-primary-400"
                 onClick={() => setShowPassword((v) => !v)}
                 tabIndex={-1}
                 aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
               >
-                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
               </button>
             </div>
-            {errors.password && (
-              <p className="text-error-400 text-xs mt-1">{errors.password}</p>
-            )}
+            {errors.password && <p className="text-error-400 text-xs mt-1">{errors.password}</p>}
           </div>
-
           {/* Rol */}
           <div>
-            <label className="block text-sm font-medium text-neutral-300 mb-1">
-              Rol *
-            </label>
+            <label className="block text-sm font-medium text-neutral-300 mb-1" htmlFor="role">Rol *</label>
             <select
+              id="role"
               name="role"
               value={formData.role}
               onChange={handleChange}
-              className="input-field"
+              className="input-field w-full"
             >
               <option value={USER_ROLES.ADMIN}>Administrador</option>
               <option value={USER_ROLES.MANAGER}>Gerente</option>
@@ -299,54 +288,46 @@ export default function UserModal({
               <option value={USER_ROLES.VIEWER}>Visualizador</option>
             </select>
           </div>
-
           {/* Teléfono */}
           <div>
-            <label className="block text-sm font-medium text-neutral-300 mb-1">
-              Teléfono
-            </label>
-            <div className="relative">
-              <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-neutral-400" />
-              <input
-                type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                className="input-field pl-10"
-                placeholder="Ej: +54 11 1234-5678"
-              />
-            </div>
+            <label className="block text-sm font-medium text-neutral-300 mb-1" htmlFor="phone">Teléfono</label>
+            <input
+              id="phone"
+              name="phone"
+              type="tel"
+              value={formData.phone}
+              onChange={handleChange}
+              className="input-field w-full"
+              placeholder="Ej: +54 11 1234-5678"
+              autoComplete="off"
+            />
           </div>
-
           {/* Activo */}
           <div className="flex items-center space-x-2">
             <input
-              type="checkbox"
+              id="active"
               name="active"
+              type="checkbox"
               checked={formData.active}
               onChange={handleChange}
-              id="active-user-checkbox"
-              className="form-checkbox h-4 w-4 text-primary-600"
+              className="form-checkbox h-4 w-4 text-primary-400 border-neutral-500 rounded focus:ring-primary-400"
             />
-            <label htmlFor="active-user-checkbox" className="text-sm text-neutral-300">
-              Usuario activo
-            </label>
+            <label htmlFor="active" className="text-sm text-neutral-300">Usuario activo</label>
           </div>
-
           {/* Botones */}
-          <div className="flex flex-col sm:flex-row gap-3 pt-4">
-            <button
-              type="submit"
-              className="btn-primary flex-1 py-4 sm:py-3 text-base font-semibold touch-manipulation"
-            >
-              {isEditing ? 'Guardar Cambios' : 'Crear Usuario'}
-            </button>
+          <div className="flex justify-end gap-3 pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="btn-secondary py-4 sm:py-3 text-base font-semibold touch-manipulation"
+              className="btn-secondary px-5 py-2 rounded-lg"
             >
               Cancelar
+            </button>
+            <button
+              type="submit"
+              className="btn-primary px-5 py-2 rounded-lg font-semibold"
+            >
+              {isEditing ? 'Guardar Cambios' : 'Crear Usuario'}
             </button>
           </div>
         </form>
