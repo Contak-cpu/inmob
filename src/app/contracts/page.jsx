@@ -5,10 +5,12 @@ import { getCurrentUser, USER_ROLES } from '@/utils/auth';
 import { CONTRACT_TYPES } from '@/lib/config';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import { useRouter } from 'next/navigation';
+import { useTest } from '@/contexts/TestContext';
 
 export default function ImportedContractsPage() {
   const user = getCurrentUser();
   const router = useRouter();
+  const { isTestMode } = useTest();
   const [contracts, setContracts] = useState([]);
   const [selected, setSelected] = useState(null);
   const [showImportModal, setShowImportModal] = useState(false);
@@ -16,10 +18,10 @@ export default function ImportedContractsPage() {
 
   // Cargar contratos desde la API al montar
   React.useEffect(() => {
-    fetch('/api/contracts')
+    fetch(`/api/contracts?testMode=${isTestMode}`)
       .then(res => res.json())
       .then(data => setContracts(data.contracts || []));
-  }, []);
+  }, [isTestMode]);
 
   // Filtrar contratos según permisos del usuario
   const filteredContracts = contracts.filter(c => c.permisos?.includes(user?.role));

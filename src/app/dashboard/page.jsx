@@ -21,7 +21,7 @@ import StatsCard from '@/components/ui/StatsCard';
 import { useNotifications } from '@/hooks/useNotifications';
 import Button from '@/components/ui/Button';
 import Link from 'next/link';
-import TestingOptimizationPanel from '@/components/TestingOptimizationPanel';
+
 
 export default function DashboardPage() {
   const [user, setUser] = useState(null);
@@ -274,18 +274,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Panel de Testing y Optimización */}
-      <div className="card">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-white">Testing y Optimización</h3>
-          <div className="flex items-center space-x-2">
-            <TestTube className="h-5 w-5 text-blue-400" />
-            <Zap className="h-5 w-5 text-yellow-400" />
-            <Eye className="h-5 w-5 text-green-400" />
-          </div>
-        </div>
-        <TestingOptimizationPanel />
-      </div>
+
     </div>
   );
 } 
