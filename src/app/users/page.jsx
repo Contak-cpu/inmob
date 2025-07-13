@@ -19,8 +19,10 @@ import { useNotifications } from '@/hooks/useNotifications';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import UserModal from '@/components/ui/UserModal';
 import { useConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { useTest } from '@/contexts/TestContext';
 
 export default function UsersPage() {
+  const { isTestMode } = useTest();
   const [user, setUser] = useState(null);
   const [users, setUsers] = useState([]);
   const [selectedRole, setSelectedRole] = useState('all');
@@ -31,8 +33,43 @@ export default function UsersPage() {
 
   useEffect(() => {
     setUser(getCurrentUser());
-    setUsers(getAllUsers());
-  }, []);
+    if (isTestMode) {
+      setUsers([
+        {
+          id: '1',
+          name: 'Administrador',
+          email: 'admin@konradinmobiliaria.com',
+          username: 'admin',
+          role: USER_ROLES.ADMIN,
+          phone: '',
+          active: true,
+          createdAt: '2023-12-31'
+        },
+        {
+          id: '2',
+          name: 'Germán E. Konrad',
+          email: 'german@konradinmobiliaria.com',
+          username: 'german',
+          role: USER_ROLES.MANAGER,
+          phone: '',
+          active: true,
+          createdAt: '2023-12-31'
+        },
+        {
+          id: '3',
+          name: 'Agente Inmobiliario',
+          email: 'agente@konradinmobiliaria.com',
+          username: 'agente1',
+          role: USER_ROLES.AGENT,
+          phone: '',
+          active: true,
+          createdAt: '2023-12-31'
+        }
+      ]);
+    } else {
+      setUsers([]);
+    }
+  }, [isTestMode]);
 
   const handleCreateUser = () => {
     setEditingUser(null);
