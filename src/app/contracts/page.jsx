@@ -1,14 +1,18 @@
 "use client";
 import React, { useState } from 'react';
-import { FileText, Eye, Download, Plus, Lock, Unlock } from 'lucide-react';
+import { FileText, Eye, Download, Plus, Lock, Unlock, FilePlus, Upload } from 'lucide-react';
 import { getCurrentUser, USER_ROLES } from '@/utils/auth';
+import { CONTRACT_TYPES } from '@/lib/config';
 import Breadcrumbs from '@/components/Breadcrumbs';
+import { useRouter } from 'next/navigation';
 
 export default function ImportedContractsPage() {
   const user = getCurrentUser();
+  const router = useRouter();
   const [contracts, setContracts] = useState([]);
   const [selected, setSelected] = useState(null);
   const [showImportModal, setShowImportModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   // Cargar contratos desde la API al montar
   React.useEffect(() => {
@@ -67,17 +71,27 @@ export default function ImportedContractsPage() {
       <Breadcrumbs />
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white mb-2">Contratos Importados</h1>
-          <p className="text-neutral-400">Visualiza y gestiona contratos cargados al sistema</p>
+          <h1 className="text-2xl font-bold text-white mb-2">Gestión de Contratos</h1>
+          <p className="text-neutral-400">Crea nuevos contratos o visualiza los existentes</p>
         </div>
-        {(user?.role === USER_ROLES.ADMIN || user?.role === USER_ROLES.MANAGER) && (
-          <button
-            className="btn-primary flex items-center gap-2"
-            onClick={() => setShowImportModal(true)}
-          >
-            <Plus className="h-5 w-5" /> Importar Contrato
-          </button>
-        )}
+        <div className="flex gap-3">
+          {(user?.role === USER_ROLES.ADMIN || user?.role === USER_ROLES.MANAGER || user?.role === USER_ROLES.AGENT) && (
+            <button
+              className="btn-primary flex items-center gap-2"
+              onClick={() => setShowCreateModal(true)}
+            >
+              <FilePlus className="h-5 w-5" /> Crear Contrato
+            </button>
+          )}
+          {(user?.role === USER_ROLES.ADMIN || user?.role === USER_ROLES.MANAGER) && (
+            <button
+              className="btn-secondary flex items-center gap-2"
+              onClick={() => setShowImportModal(true)}
+            >
+              <Upload className="h-5 w-5" /> Importar
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Lista de contratos */}
@@ -224,6 +238,52 @@ export default function ImportedContractsPage() {
                 <button type="submit" className="btn-primary">Importar</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal para crear nuevo contrato */}
+      {showCreateModal && (
+        <div className="modal-overlay" onClick={e => { if (e.target.classList.contains('modal-overlay')) setShowCreateModal(false); }}>
+          <div className="modal-content max-w-2xl w-full mx-auto p-6 animate-fade-in">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-white">Crear Nuevo Contrato</h2>
+              <button className="btn-secondary" onClick={() => setShowCreateModal(false)}>Cerrar</button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {Object.entries(CONTRACT_TYPES).map(([key, contract]) => (
+                <div
+                  key={key}
+                  className="card card-hover cursor-pointer p-4 text-center"
+                  onClick={() => {
+                    setShowCreateModal(false);
+                    router.push(`/contracts/${key}`);
+                  }}
+                >
+                  <div className="mb-3">
+                    <div className={`w-12 h-12 mx-auto rounded-xl flex items-center justify-center bg-${contract.color}-500/20 border border-${contract.color}-500/30`}>
+                      <FileText className={`h-6 w-6 text-${contract.color}-400`} />
+                    </div>
+                  </div>
+                  <h3 className="font-semibold text-white mb-2">{contract.name}</h3>
+                  <p className="text-sm text-neutral-400 mb-3">{contract.description}</p>
+                  <div className="text-xs text-neutral-500">
+                    Ajuste: {contract.adjustmentType}
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div className="mt-6 p-4 bg-neutral-800/50 rounded-xl">
+              <div className="flex items-start space-x-3">
+                <div className="w-2 h-2 bg-primary-400 rounded-full mt-2 flex-shrink-0"></div>
+                <div className="text-sm text-neutral-300">
+                  <p className="font-medium mb-1">¿Qué tipo de contrato necesitas?</p>
+                  <p className="text-neutral-400">Selecciona el tipo de contrato que mejor se adapte a tus necesidades. Cada tipo tiene sus propias características y cláusulas específicas.</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
