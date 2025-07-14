@@ -1,15 +1,42 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { TestTube, Eye, EyeOff } from 'lucide-react';
 import { useTest } from '@/contexts/TestContext';
+import { useNotifications } from '@/hooks/useNotifications';
 
 export default function TestModeToggle() {
   const { isTestMode, toggleTestMode } = useTest();
+  const { showSuccess } = useNotifications();
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const handler = (e) => {
+        if (e.key === 'konrad_test_mode') {
+          window.location.reload();
+        }
+      };
+      window.addEventListener('storage', handler);
+      return () => window.removeEventListener('storage', handler);
+    }
+  }, []);
+
+  const handleToggle = () => {
+    toggleTestMode();
+    showSuccess(
+      isTestMode ? 'Modo Test desactivado' : 'Modo Test activado',
+      isTestMode
+        ? 'Ahora verás datos reales.'
+        : 'Ahora verás datos de prueba.'
+    );
+    setTimeout(() => {
+      window.location.reload();
+    }, 500);
+  };
 
   return (
     <button
-      onClick={toggleTestMode}
+      onClick={handleToggle}
       className={`fixed top-4 right-4 z-50 p-3 rounded-full shadow-lg transition-all duration-300 ${
         isTestMode 
           ? 'bg-warning-500 hover:bg-warning-600 text-white' 

@@ -179,8 +179,8 @@ export default function UserModal({
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm animate-fade-in transition-opacity duration-300" onClick={handleBackdropClick}>
-      <div className="modal-content relative w-full max-w-xl bg-neutral-800 border border-neutral-700 rounded-2xl shadow-2xl mx-auto my-8 p-4 sm:p-8 animate-slide-up transition-transform duration-300 overflow-y-auto max-h-[90vh]" style={{ minHeight: 'auto' }}>
+    <div className="modal-overlay fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm animate-fade-in transition-opacity duration-300" onClick={handleBackdropClick}>
+      <div className="modal-content relative w-full max-w-xl z-[9999] bg-neutral-800 border border-neutral-700 rounded-2xl shadow-2xl mx-auto my-8 p-4 sm:p-8 animate-slide-up transition-transform duration-300 overflow-y-auto max-h-[90vh]" style={{ minHeight: 'auto' }}>
         {/* Header */}
         <div className="flex items-center justify-between pb-6 border-b border-neutral-700">
           <div className="flex items-center space-x-3">
