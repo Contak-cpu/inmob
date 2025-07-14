@@ -255,8 +255,17 @@ export const getRecentActivity = () => {
  * Formatea tiempo relativo
  */
 function formatRelativeTime(date) {
+  if (!date) return 'Fecha no disponible';
+  
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  
+  // Verificar si la fecha es válida
+  if (isNaN(dateObj.getTime())) {
+    return 'Fecha inválida';
+  }
+  
   const now = new Date();
-  const diffInSeconds = Math.floor((now - date) / 1000);
+  const diffInSeconds = Math.floor((now - dateObj) / 1000);
 
   if (diffInSeconds < 60) {
     return 'Hace un momento';

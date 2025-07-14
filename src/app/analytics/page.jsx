@@ -54,19 +54,19 @@ export default function AnalyticsPage() {
         totalUsers: 80
       });
       setRevenueData([
-        { month: 'Enero', contracts: 10, receipts: 20 },
-        { month: 'Febrero', contracts: 15, receipts: 25 },
-        { month: 'Marzo', contracts: 25, receipts: 30 },
+        { month: 'Enero', contracts: 10, receipts: 20, total: 150000 },
+        { month: 'Febrero', contracts: 15, receipts: 25, total: 200000 },
+        { month: 'Marzo', contracts: 25, receipts: 30, total: 250000 },
       ]);
       setTopProperties([
-        { name: 'Av. Ficticia 123', value: 10 },
-        { name: 'Calle Demo 456', value: 8 },
-        { name: 'Ruta Test 789', value: 6 },
+        { name: 'Av. Ficticia 123', type: 'Locación', revenue: 150000, contracts: 10, trend: 'up' },
+        { name: 'Calle Demo 456', type: 'Comercial', revenue: 120000, contracts: 8, trend: 'up' },
+        { name: 'Ruta Test 789', type: 'Residencial', revenue: 90000, contracts: 6, trend: 'down' },
       ]);
       setDocumentDistribution([
-        { type: 'Contratos', value: 45 },
-        { type: 'Recibos', value: 35 },
-        { type: 'Otros', value: 20 },
+        { type: 'Contratos', percentage: 45 },
+        { type: 'Recibos', percentage: 35 },
+        { type: 'Otros', percentage: 20 },
       ]);
       setRecentActivity([
         { type: 'contract', title: 'Contrato de prueba generado', description: 'Contrato de locación para Av. Ficticia 123', time: 'Hace 1 hora', user: 'Test Admin' },
@@ -230,7 +230,7 @@ export default function AnalyticsPage() {
                       <span className="text-xs text-neutral-400">{data.receipts} recibos</span>
                     </div>
                   </div>
-                  <span className="text-sm font-medium text-white">${data.total.toLocaleString()}</span>
+                  <span className="text-sm font-medium text-white">${(data.total || 0).toLocaleString()}</span>
                 </div>
               ))
             ) : (
@@ -256,7 +256,7 @@ export default function AnalyticsPage() {
                     <p className="text-xs text-neutral-400">{property.type} • {property.contracts} contratos</p>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <span className="text-sm font-medium text-white">${property.revenue.toLocaleString()}</span>
+                    <span className="text-sm font-medium text-white">${(property.revenue || 0).toLocaleString()}</span>
                     {property.trend === 'up' ? (
                       <TrendingUp className="h-4 w-4 text-success-400" />
                     ) : (
