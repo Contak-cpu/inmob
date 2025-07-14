@@ -29,6 +29,9 @@ export default function DashboardPage() {
   const { showSuccess, showError, showWarning, showInfo } = useNotifications();
   const { isTestMode } = useTest();
 
+  // Debug: mostrar el estado del modo de prueba
+  console.log('Dashboard - isTestMode:', isTestMode);
+
   // Estadísticas y actividad de prueba
   const testStats = [
     {
@@ -116,6 +119,9 @@ export default function DashboardPage() {
     }
   }, [user, showSuccess, showInfo]);
 
+  // Debug: mostrar qué datos se están usando
+  console.log('Dashboard - Usando datos de prueba:', isTestMode);
+  
   const stats = isTestMode ? testStats : [
     {
       name: 'Contratos Activos',
@@ -206,6 +212,14 @@ export default function DashboardPage() {
                 <Eye className="h-6 w-6 text-warning-400" />
               </div>
             </Link>
+            {/* Indicador de modo de prueba */}
+            <div className={`px-3 py-1 rounded-full text-xs font-medium ${
+              isTestMode 
+                ? 'bg-warning-500/20 text-warning-400 border border-warning-500/30' 
+                : 'bg-neutral-500/20 text-neutral-400 border border-neutral-500/30'
+            }`}>
+              {isTestMode ? 'MODO PRUEBA' : 'MODO NORMAL'}
+            </div>
           </div>
         </div>
       </div>
