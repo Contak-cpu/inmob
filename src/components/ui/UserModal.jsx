@@ -17,12 +17,18 @@ import { USER_ROLES } from '@/utils/auth';
 /**
  * Modal para crear/editar usuarios
  */
+let modalAlreadyMounted = false;
+
 export default function UserModal({ 
   isOpen, 
   onClose, 
   user = null, 
   onSave 
 }) {
+  if (modalAlreadyMounted) return null;
+  if (!isOpen) return null;
+  modalAlreadyMounted = true;
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -78,6 +84,10 @@ export default function UserModal({
       document.body.style.overflow = '';
     };
   }, [isOpen]);
+
+  useEffect(() => {
+    return () => { modalAlreadyMounted = false; };
+  }, []);
 
   // Cerrar modal con click fuera
   const handleBackdropClick = (e) => {
@@ -175,8 +185,6 @@ export default function UserModal({
         return 'Usuario';
     }
   };
-
-  if (!isOpen) return null;
 
   return (
     <div className="modal-overlay fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm animate-fade-in transition-opacity duration-300" onClick={handleBackdropClick}>
