@@ -18,6 +18,7 @@ import { getCurrentUser } from '@/utils/auth';
 import { getRealStats, getRevenueData, getTopProperties, getDocumentDistribution, getRecentActivity } from '@/utils/analytics';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import ExportModal from '@/components/ui/ExportModal';
+import { useTest } from '@/contexts/TestContext';
 
 export default function AnalyticsPage() {
   const [user, setUser] = useState(null);
@@ -28,6 +29,7 @@ export default function AnalyticsPage() {
   const [documentDistribution, setDocumentDistribution] = useState([]);
   const [recentActivity, setRecentActivity] = useState([]);
   const [exportModalOpen, setExportModalOpen] = useState(false);
+  const { isTestMode } = useTest();
 
   useEffect(() => {
     setUser(getCurrentUser());
@@ -41,15 +43,44 @@ export default function AnalyticsPage() {
   ];
 
   useEffect(() => {
-    setUser(getCurrentUser());
-    
-    // Cargar datos reales
-    setStats(getRealStats());
-    setRevenueData(getRevenueData());
-    setTopProperties(getTopProperties());
-    setDocumentDistribution(getDocumentDistribution());
-    setRecentActivity(getRecentActivity());
-  }, []);
+    if (isTestMode) {
+      setStats({
+        totalRevenue: '$999,999',
+        receiptsGrowth: 25,
+        activeContracts: 50,
+        contractsGrowth: 10,
+        totalReceipts: 200,
+        usersGrowth: 5,
+        totalUsers: 80
+      });
+      setRevenueData([
+        { month: 'Enero', contracts: 10, receipts: 20 },
+        { month: 'Febrero', contracts: 15, receipts: 25 },
+        { month: 'Marzo', contracts: 25, receipts: 30 },
+      ]);
+      setTopProperties([
+        { name: 'Av. Ficticia 123', value: 10 },
+        { name: 'Calle Demo 456', value: 8 },
+        { name: 'Ruta Test 789', value: 6 },
+      ]);
+      setDocumentDistribution([
+        { type: 'Contratos', value: 45 },
+        { type: 'Recibos', value: 35 },
+        { type: 'Otros', value: 20 },
+      ]);
+      setRecentActivity([
+        { type: 'contract', title: 'Contrato de prueba generado', description: 'Contrato de locación para Av. Ficticia 123', time: 'Hace 1 hora', user: 'Test Admin' },
+        { type: 'receipt', title: 'Recibo de prueba creado', description: 'Recibo mensual para propiedad en Calle Demo 456', time: 'Hace 2 horas', user: 'Test Agente' },
+        { type: 'client', title: 'Cliente ficticio registrado', description: 'Juan Test - Propiedad en testeo', time: 'Hace 3 horas', user: 'Test Admin' }
+      ]);
+    } else {
+      setStats(getRealStats());
+      setRevenueData(getRevenueData());
+      setTopProperties(getTopProperties());
+      setDocumentDistribution(getDocumentDistribution());
+      setRecentActivity(getRecentActivity());
+    }
+  }, [isTestMode]);
 
   return (
     <div className="space-y-6">

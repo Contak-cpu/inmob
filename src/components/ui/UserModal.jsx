@@ -24,8 +24,6 @@ export default function UserModal({
   user = null, 
   onSave 
 }) {
-  if (!isOpen) return null;
-
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -81,6 +79,8 @@ export default function UserModal({
       document.body.style.overflow = '';
     };
   }, [isOpen]);
+
+  if (!isOpen) return null;
 
   // Cerrar modal con click fuera
   const handleBackdropClick = (e) => {

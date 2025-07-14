@@ -8,6 +8,7 @@ import { generateReceiptPDF } from '@/utils/pdfGenerator';
 import { formatDate } from '@/utils/formatters';
 import { notifySuccess, notifyError } from '@/utils/notifications';
 import Breadcrumbs from '@/components/Breadcrumbs';
+import { useTest } from '@/contexts/TestContext';
 
 const testDataAlquiler = {
   tenantName: 'Juan Pérez',
@@ -163,6 +164,16 @@ export default function ReceiptForm({ receiptType }) {
   const router = useRouter();
   const [form, setForm] = useState({});
   const [showPreview, setShowPreview] = useState('ticket');
+  const { isTestMode } = useTest();
+
+  React.useEffect(() => {
+    if (isTestMode) {
+      if (receiptType === 'alquiler') setForm(testDataAlquiler);
+      if (receiptType === 'reparacion') setForm(testDataReparacion);
+    } else {
+      setForm({});
+    }
+  }, [isTestMode, receiptType]);
 
   // --- ALQUILER ---
   if (receiptType === 'alquiler') {

@@ -24,14 +24,11 @@ export default function TestModeToggle() {
   const handleToggle = () => {
     toggleTestMode();
     showSuccess(
-      isTestMode ? 'Modo Test desactivado' : 'Modo Test activado',
-      isTestMode
-        ? 'Ahora verás datos reales.'
-        : 'Ahora verás datos de prueba.'
+      !isTestMode ? 'Modo Test activado' : 'Modo Test desactivado',
+      !isTestMode
+        ? 'Ahora verás datos de prueba en toda la app.'
+        : 'Ahora verás datos reales en toda la app.'
     );
-    setTimeout(() => {
-      window.location.reload();
-    }, 500);
   };
 
   return (

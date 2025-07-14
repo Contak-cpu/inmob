@@ -18,9 +18,44 @@ export default function ImportedContractsPage() {
 
   // Cargar contratos desde la API al montar
   React.useEffect(() => {
-    fetch(`/api/contracts?testMode=${isTestMode}`)
-      .then(res => res.json())
-      .then(data => setContracts(data.contracts || []));
+    if (isTestMode) {
+      setContracts([
+        {
+          id: 'c1',
+          cliente: 'Juan Pérez',
+          tipo: 'Alquiler',
+          fechaInicio: '2024-01-01',
+          fechaFin: '2025-01-01',
+          monto: 150000,
+          estado: 'Activo',
+          observaciones: 'Contrato de alquiler anual.',
+          archivos: [
+            { nombre: 'Contrato.pdf', url: '#', tipo: 'pdf' }
+          ],
+          permisos: [USER_ROLES.ADMIN, USER_ROLES.MANAGER, USER_ROLES.AGENT, USER_ROLES.VIEWER],
+          creadoPor: 'admin',
+          fechaCarga: '2024-01-01',
+        },
+        {
+          id: 'c2',
+          cliente: 'María González',
+          tipo: 'Comercial',
+          fechaInicio: '2023-06-01',
+          fechaFin: '2024-06-01',
+          monto: 250000,
+          estado: 'Finalizado',
+          observaciones: 'Contrato comercial de local.',
+          archivos: [],
+          permisos: [USER_ROLES.ADMIN, USER_ROLES.MANAGER],
+          creadoPor: 'german',
+          fechaCarga: '2023-06-01',
+        }
+      ]);
+    } else {
+      fetch(`/api/contracts?testMode=${isTestMode}`)
+        .then(res => res.json())
+        .then(data => setContracts(data.contracts || []));
+    }
   }, [isTestMode]);
 
   // Filtrar contratos según permisos del usuario

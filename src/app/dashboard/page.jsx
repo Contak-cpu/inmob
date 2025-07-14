@@ -21,11 +21,73 @@ import StatsCard from '@/components/ui/StatsCard';
 import { useNotifications } from '@/hooks/useNotifications';
 import Button from '@/components/ui/Button';
 import Link from 'next/link';
+import { useTest } from '@/contexts/TestContext';
 
 
 export default function DashboardPage() {
   const [user, setUser] = useState(null);
   const { showSuccess, showError, showWarning, showInfo } = useNotifications();
+  const { isTestMode } = useTest();
+
+  // Estadísticas y actividad de prueba
+  const testStats = [
+    {
+      name: 'Contratos Activos',
+      value: '99',
+      change: '+20%',
+      changeType: 'positive',
+      icon: FileText,
+      color: 'primary'
+    },
+    {
+      name: 'Recibos Generados',
+      value: '320',
+      change: '+15%',
+      changeType: 'positive',
+      icon: Receipt,
+      color: 'success'
+    },
+    {
+      name: 'Clientes Activos',
+      value: '200',
+      change: '+10%',
+      changeType: 'positive',
+      icon: Users,
+      color: 'warning'
+    },
+    {
+      name: 'Ingresos Mensuales',
+      value: '$120,000',
+      change: '+30%',
+      changeType: 'positive',
+      icon: DollarSign,
+      color: 'info'
+    }
+  ];
+
+  const testRecentActivity = [
+    {
+      type: 'contract',
+      title: 'Contrato de prueba generado',
+      description: 'Contrato de locación para Av. Ficticia 123',
+      time: 'Hace 1 hora',
+      user: 'Test Admin'
+    },
+    {
+      type: 'receipt',
+      title: 'Recibo de prueba creado',
+      description: 'Recibo mensual para propiedad en Calle Demo 456',
+      time: 'Hace 2 horas',
+      user: 'Test Agente'
+    },
+    {
+      type: 'client',
+      title: 'Cliente ficticio registrado',
+      description: 'Juan Test - Propiedad en testeo',
+      time: 'Hace 3 horas',
+      user: 'Test Admin'
+    }
+  ];
 
   useEffect(() => {
     setUser(getCurrentUser());
@@ -54,7 +116,7 @@ export default function DashboardPage() {
     }
   }, [user, showSuccess, showInfo]);
 
-  const stats = [
+  const stats = isTestMode ? testStats : [
     {
       name: 'Contratos Activos',
       value: '24',
@@ -89,9 +151,7 @@ export default function DashboardPage() {
     }
   ];
 
-
-
-  const recentActivity = [
+  const recentActivity = isTestMode ? testRecentActivity : [
     {
       type: 'contract',
       title: 'Nuevo contrato generado',

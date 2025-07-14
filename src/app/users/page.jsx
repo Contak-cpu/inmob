@@ -263,15 +263,17 @@ export default function UsersPage() {
       </div>
 
       {/* Modal de Usuario */}
-      <UserModal
-        isOpen={userModalOpen}
-        onClose={() => {
-          setUserModalOpen(false);
-          setEditingUser(null);
-        }}
-        user={editingUser}
-        onSave={handleSaveUser}
-      />
+      {userModalOpen && (
+        <UserModal
+          isOpen={userModalOpen}
+          onClose={() => {
+            setUserModalOpen(false);
+            setEditingUser(null);
+          }}
+          user={editingUser}
+          onSave={handleSaveUser}
+        />
+      )}
 
       {/* Diálogo de Confirmación */}
       <ConfirmDialogComponent />

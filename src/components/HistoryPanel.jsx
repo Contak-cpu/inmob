@@ -4,8 +4,10 @@ import React, { useState, useEffect } from 'react';
 import { FileText, Receipt, Clock, Search, Filter, Download, Trash2, Eye } from 'lucide-react';
 import { getHistory, getAllContracts, getAllReceipts, getStats } from '@/utils/database';
 import { formatDate, formatCurrency } from '@/utils/formatters';
+import { useTest } from '@/contexts/TestContext';
 
 export default function HistoryPanel() {
+  const { isTestMode } = useTest();
   const [activeTab, setActiveTab] = useState('history');
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState('all');
@@ -15,8 +17,53 @@ export default function HistoryPanel() {
   const [stats, setStats] = useState({});
 
   useEffect(() => {
-    loadData();
-  }, []);
+    if (isTestMode) {
+      setHistory([
+        {
+          id: 'h1',
+          type: 'contract',
+          summary: 'Contrato de alquiler generado para Juan Pérez',
+          date: '2024-01-01',
+        },
+        {
+          id: 'h2',
+          type: 'receipt',
+          summary: 'Recibo emitido para María González',
+          date: '2024-01-10',
+        },
+      ]);
+      setContracts([
+        {
+          id: 'c1',
+          cliente: 'Juan Pérez',
+          tipo: 'Alquiler',
+          fechaInicio: '2024-01-01',
+          fechaFin: '2025-01-01',
+          monto: 150000,
+          estado: 'Activo',
+          observaciones: 'Contrato de alquiler anual.',
+        },
+      ]);
+      setReceipts([
+        {
+          id: 'r1',
+          cliente: 'María González',
+          tipo: 'Alquiler',
+          fecha: '2024-01-10',
+          monto: 155000,
+          estado: 'Pagado',
+        },
+      ]);
+      setStats({
+        totalContracts: 1,
+        totalReceipts: 1,
+        contractsThisMonth: 1,
+        receiptsThisMonth: 1,
+      });
+    } else {
+      loadData();
+    }
+  }, [isTestMode]);
 
   const loadData = () => {
     setHistory(getHistory());
