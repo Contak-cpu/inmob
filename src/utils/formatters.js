@@ -67,7 +67,15 @@ export const formatCurrency = (amount) => {
 
 // Función para formatear fechas en español
 export const formatDate = (date) => {
+  if (!date) return 'Fecha no disponible';
+  
   const dateObj = typeof date === 'string' ? new Date(date) : date;
+  
+  // Verificar si la fecha es válida
+  if (isNaN(dateObj.getTime())) {
+    return 'Fecha inválida';
+  }
+  
   return dateObj.toLocaleDateString('es-AR', {
     weekday: 'long',
     year: 'numeric',
@@ -78,7 +86,15 @@ export const formatDate = (date) => {
 
 // Función para formatear fecha corta
 export const formatShortDate = (date) => {
+  if (!date) return 'Fecha no disponible';
+  
   const dateObj = typeof date === 'string' ? new Date(date) : date;
+  
+  // Verificar si la fecha es válida
+  if (isNaN(dateObj.getTime())) {
+    return 'Fecha inválida';
+  }
+  
   return dateObj.toLocaleDateString('es-AR', {
     day: '2-digit',
     month: '2-digit',

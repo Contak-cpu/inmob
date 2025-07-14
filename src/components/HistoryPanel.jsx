@@ -35,11 +35,11 @@ export default function HistoryPanel() {
       setContracts([
         {
           id: 'c1',
-          cliente: 'Juan Pérez',
-          tipo: 'Alquiler',
-          fechaInicio: '2024-01-01',
-          fechaFin: '2025-01-01',
-          monto: 150000,
+          tenantName: 'Juan Pérez',
+          propertyAddress: 'Av. Corrientes 1234, CABA',
+          contractType: 'Alquiler',
+          monthlyPrice: 150000,
+          createdAt: '2024-01-01',
           estado: 'Activo',
           observaciones: 'Contrato de alquiler anual.',
         },
@@ -47,10 +47,11 @@ export default function HistoryPanel() {
       setReceipts([
         {
           id: 'r1',
-          cliente: 'María González',
-          tipo: 'Alquiler',
-          fecha: '2024-01-10',
-          monto: 155000,
+          tenantName: 'María González',
+          propertyAddress: 'Av. Santa Fe 567, CABA',
+          receiptType: 'Alquiler',
+          totalAmount: 155000,
+          createdAt: '2024-01-10',
           estado: 'Pagado',
         },
       ]);
@@ -288,7 +289,7 @@ export default function HistoryPanel() {
                             {getTypeLabel(item.type)}
                           </span>
                           <span className="text-xs text-neutral-400">
-                            {formatDate(item.timestamp)}
+                            {formatDate(item.timestamp || item.date)}
                           </span>
                         </div>
                         <p className="text-sm text-neutral-300 mt-1">{item.summary}</p>
