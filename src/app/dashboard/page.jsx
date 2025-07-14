@@ -267,21 +267,21 @@ export default function DashboardPage() {
                 <div className="w-3 h-3 bg-primary-400 rounded-full"></div>
                 <span className="text-sm text-white">Contratos</span>
               </div>
-              <span className="text-sm font-medium text-white">45%</span>
+              <span className="text-sm font-medium text-white">{isTestMode ? '60%' : '45%'}</span>
             </div>
             <div className="flex items-center justify-between p-3 bg-success-500/10 rounded-lg">
               <div className="flex items-center space-x-3">
                 <div className="w-3 h-3 bg-success-400 rounded-full"></div>
                 <span className="text-sm text-white">Recibos</span>
               </div>
-              <span className="text-sm font-medium text-white">35%</span>
+              <span className="text-sm font-medium text-white">{isTestMode ? '30%' : '35%'}</span>
             </div>
             <div className="flex items-center justify-between p-3 bg-warning-500/10 rounded-lg">
               <div className="flex items-center space-x-3">
                 <div className="w-3 h-3 bg-warning-400 rounded-full"></div>
                 <span className="text-sm text-white">Otros</span>
               </div>
-              <span className="text-sm font-medium text-white">20%</span>
+              <span className="text-sm font-medium text-white">{isTestMode ? '10%' : '20%'}</span>
             </div>
           </div>
         </div>
@@ -297,14 +297,18 @@ export default function DashboardPage() {
           <div className="space-y-3">
             <div className="flex items-center justify-between p-3 bg-warning-500/10 rounded-lg">
               <div>
-                <p className="text-sm font-medium text-white">Contrato Av. San Martín</p>
+                <p className="text-sm font-medium text-white">
+                  {isTestMode ? 'Contrato Av. Ficticia 123' : 'Contrato Av. San Martín'}
+                </p>
                 <p className="text-xs text-neutral-400">Vence en 15 días</p>
               </div>
               <span className="text-xs text-warning-400">15 días</span>
             </div>
             <div className="flex items-center justify-between p-3 bg-error-500/10 rounded-lg">
               <div>
-                <p className="text-sm font-medium text-white">Recibo Belgrano 456</p>
+                <p className="text-sm font-medium text-white">
+                  {isTestMode ? 'Recibo Calle Demo 456' : 'Recibo Belgrano 456'}
+                </p>
                 <p className="text-xs text-neutral-400">Vence en 3 días</p>
               </div>
               <span className="text-xs text-error-400">3 días</span>
@@ -320,15 +324,15 @@ export default function DashboardPage() {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-sm text-neutral-400">Uptime</span>
-              <span className="text-sm font-medium text-success-400">99.9%</span>
+              <span className="text-sm font-medium text-success-400">{isTestMode ? '100%' : '99.9%'}</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-neutral-400">Documentos generados hoy</span>
-              <span className="text-sm font-medium text-white">12</span>
+              <span className="text-sm font-medium text-white">{isTestMode ? '25' : '12'}</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-neutral-400">Usuarios activos</span>
-              <span className="text-sm font-medium text-white">3</span>
+              <span className="text-sm font-medium text-white">{isTestMode ? '5' : '3'}</span>
             </div>
           </div>
         </div>
