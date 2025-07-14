@@ -17,7 +17,6 @@ import { USER_ROLES } from '@/utils/auth';
 /**
  * Modal para crear/editar usuarios
  */
-let modalAlreadyMounted = false;
 
 export default function UserModal({ 
   isOpen, 
@@ -25,9 +24,7 @@ export default function UserModal({
   user = null, 
   onSave 
 }) {
-  if (modalAlreadyMounted) return null;
   if (!isOpen) return null;
-  modalAlreadyMounted = true;
 
   const [formData, setFormData] = useState({
     name: '',
@@ -84,10 +81,6 @@ export default function UserModal({
       document.body.style.overflow = '';
     };
   }, [isOpen]);
-
-  useEffect(() => {
-    return () => { modalAlreadyMounted = false; };
-  }, []);
 
   // Cerrar modal con click fuera
   const handleBackdropClick = (e) => {
